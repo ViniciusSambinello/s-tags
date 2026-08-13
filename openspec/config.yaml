@@ -1,0 +1,46 @@
+schema: spec-driven
+
+context: |
+  Project: s-tags — a Minecraft Paper plugin providing a cosmetic Tag system
+  (chat/nametag/tab prefix) and a Title system (a per-viewer hologram rendered
+  above the player nametag).
+
+  Tech stack:
+    - Java 25 (language level 25, toolchain 25)
+    - Paper API 26.2 (io.papermc.paper:paper-api:26.2.build.+), Adventure 5
+    - Paper plugin format (paper-plugin.yml, api-version '26.2')
+    - Gradle with Kotlin DSL (build.gradle.kts, settings.gradle.kts)
+    - Persistence: MySQL (HikariCP + JDBC) or YAML file, selected by config
+    - Soft dependency: PlaceholderAPI (provide own expansion + consume placeholders)
+
+  Hard conventions (non-negotiable, apply to every artifact and every task):
+    - Everything in English: code, identifiers, commands, permissions, log output,
+      player-facing messages, config keys, docs, commit messages.
+    - NEVER write comments in source code (.java, .kts). Comments are allowed only
+      in .yml resources where they help a server owner understand a setting.
+    - Immutable programming: final classes, final fields, no setters, defensive
+      copies, java.util.List/Map/Set copyOf, records for value types, sealed
+      interfaces where a closed hierarchy applies. Mutation happens only inside
+      explicitly owned concurrent state holders.
+    - Clean architecture and SOLID: domain layer with zero Bukkit imports,
+      application layer for use cases, infrastructure layer for Bukkit/JDBC/YAML
+      adapters. Dependencies point inward only. Constructor injection, no static
+      singletons, no service locators.
+    - Performance first: never touch JDBC or disk on the main server thread,
+      cache aggressively in memory, batch writes, index MySQL tables, load the
+      tag/title catalogue once at startup rather than per lookup.
+    - Everything player-facing and operationally relevant is configurable:
+      messages, GUI layout, selector mode, database settings, refresh intervals.
+
+  Versioning and Git:
+    - Semantic versioning, first release 0.1.0.
+    - GitFlow: main (releases only), develop (integration), feature/*, release/*,
+      hotfix/*. Conventional Commits. Every change merges via PR into develop.
+    - Repository: https://github.com/ViniciusSambinello/s-tags
+
+rules:
+  proposal:
+    - Always include an explicit "Non-goals" section
+  tasks:
+    - Group tasks by GitFlow feature branch, and name the branch in the group heading
+    - Every task must be independently verifiable

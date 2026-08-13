@@ -1,0 +1,80 @@
+# s-tags messages. Every value is parsed as MiniMessage.
+# Setting a message to an empty string ("") suppresses that message entirely.
+# unprefixed-messages lists keys that should NOT receive the prefix below.
+
+prefix: "<gray>[<gold>s-tags</gold>]</gray> "
+
+unprefixed-messages:
+  - selector.menu-title
+
+messages:
+  general:
+    no-permission: "<red>You do not have permission to do that.</red>"
+    # Placeholders: <usage>
+    usage: "<red>Usage: <usage></red>"
+    player-only: "<red>This command can only be used by a player.</red>"
+    unknown-player: "<red>That player is not online.</red>"
+    reload-success: "<green>Configuration reloaded.</green>"
+    # Placeholders: <reason>
+    reload-invalid: "<red>Reload failed, the previous configuration is still active: <reason></red>"
+    storage-restart-required: "<yellow>The storage backend changed. A restart is required for this to take effect.</yellow>"
+
+  selection:
+    # Placeholders: <kind>
+    not-owned: "<red>You do not own that <kind>.</red>"
+    # Placeholders: <kind>
+    unknown: "<red>That <kind> does not exist.</red>"
+    # Placeholders: <kind>, <name>
+    selected: "<green>Your <kind> is now <name>.</green>"
+    # Placeholders: <kind>
+    cleared: "<green>Your <kind> has been cleared.</green>"
+    # Placeholders: <name>
+    tag-fallback: "<yellow>Your tag was no longer available, so you were switched to <name>.</yellow>"
+    tag-fallback-cleared: "<yellow>Your tag was no longer available and has been cleared.</yellow>"
+    title-fallback-cleared: "<yellow>Your title was no longer available and has been cleared.</yellow>"
+
+  selector:
+    # Placeholders: <kind>
+    empty: "<gray>There are no available options for that <kind> right now.</gray>"
+    menu-title: "<dark_gray>Select a cosmetic</dark_gray>"
+    locked: "<red>You have not unlocked that yet.</red>"
+    # Placeholders: <permission>
+    locked-hover: "<gray>Requires permission: <permission></gray>"
+    cooldown: "<red>Please wait before doing that again.</red>"
+    expired: "<red>That selection expired, please reopen the selector.</red>"
+    unknown-entry: "<red>That option no longer exists.</red>"
+
+  authoring:
+    step-kind: "<yellow>Are you creating a tag or a title? Type 'tag', 'title', or 'cancel'.</yellow>"
+    step-identifier: "<yellow>Enter an identifier (lowercase letters, digits, hyphen, underscore), or 'cancel'.</yellow>"
+    step-prefix: "<yellow>Enter the MiniMessage prefix, or 'cancel'.</yellow>"
+    step-permission: "<yellow>Enter the permission node, 'skip' for the default, or 'cancel'.</yellow>"
+    step-weight: "<yellow>Enter an integer weight, or 'cancel'.</yellow>"
+    step-confirm: "<yellow>Type 'confirm' to save, or 'cancel' to discard.</yellow>"
+    cancelled: "<gray>Authoring cancelled, nothing was saved.</gray>"
+    timeout: "<gray>Authoring timed out, nothing was saved.</gray>"
+    # Placeholders: <id>
+    error-duplicate-identifier: "<red>'<id>' is already in use, choose another identifier.</red>"
+    # Placeholders: <reason>
+    error-invalid-identifier: "<red>Invalid identifier: <reason></red>"
+    # Placeholders: <reason>
+    error-invalid-prefix: "<red>Invalid prefix: <reason></red>"
+    error-invalid-weight: "<red>Weight must be a whole number.</red>"
+    identifier-immutable: "<red>The identifier cannot be edited, delete and recreate instead.</red>"
+    edit-target-missing: "<red>That entry no longer exists, edit cancelled.</red>"
+    # Placeholders: <id>, <count>
+    delete-confirm: "<yellow>Delete '<id>'? <count> online player(s) currently use it. Type 'confirm' or 'cancel'.</yellow>"
+    # Placeholders: <id>
+    deleted: "<green>'<id>' was deleted.</green>"
+    # Placeholders: <id>
+    created: "<green>'<id>' was created.</green>"
+    # Placeholders: <id>
+    edited: "<green>'<id>' was updated.</green>"
+
+  command:
+    # Placeholders: <player>, <kind>, <name>
+    force-notified: "<yellow>An operator set your <kind> to <name>.</yellow>"
+    force-unowned-blocked: "<red>That player does not own that cosmetic. Enable command.allow-force-unowned to override.</red>"
+
+  storage:
+    failure: "<red>A storage error occurred, please try again shortly.</red>"
