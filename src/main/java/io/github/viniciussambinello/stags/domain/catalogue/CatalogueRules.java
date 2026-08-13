@@ -10,6 +10,27 @@ import io.github.viniciussambinello.stags.domain.cosmetic.Weight;
 
 public final class CatalogueRules {
 
+    public FieldValidation<CosmeticId> validateIdentifier(final String rawId, final CosmeticKind kind, final Catalogue catalogue) {
+        final CosmeticId id;
+        try {
+            id = new CosmeticId(rawId);
+        } catch (final IllegalArgumentException exception) {
+            return new FieldValidation.Invalid<>(new ValidationError.MalformedIdentifier(exception.getMessage()));
+        }
+        if (catalogue.contains(kind, id)) {
+            return new FieldValidation.Invalid<>(new ValidationError.DuplicateIdentifier(id));
+        }
+        return new FieldValidation.Valid<>(id);
+    }
+
+    public FieldValidation<Prefix> validatePrefix(final String rawPrefix) {
+        try {
+            return new FieldValidation.Valid<>(Prefix.parse(rawPrefix));
+        } catch (final PrefixParseException exception) {
+            return new FieldValidation.Invalid<>(new ValidationError.MalformedPrefix(exception.getMessage()));
+        }
+    }
+
     public ValidationResult validateNew(
             final CosmeticKind kind,
             final String rawId,
@@ -17,23 +38,17 @@ public final class CatalogueRules {
             final String rawPermission,
             final int rawWeight,
             final Catalogue catalogue) {
-        final CosmeticId id;
-        try {
-            id = new CosmeticId(rawId);
-        } catch (final IllegalArgumentException exception) {
-            return new ValidationResult.Rejected(new ValidationError.MalformedIdentifier(exception.getMessage()));
+        final FieldValidation<CosmeticId> idValidation = validateIdentifier(rawId, kind, catalogue);
+        if (idValidation instanceof FieldValidation.Invalid<CosmeticId> invalid) {
+            return new ValidationResult.Rejected(invalid.error());
         }
+        final CosmeticId id = ((FieldValidation.Valid<CosmeticId>) idValidation).value();
 
-        if (catalogue.contains(kind, id)) {
-            return new ValidationResult.Rejected(new ValidationError.DuplicateIdentifier(id));
+        final FieldValidation<Prefix> prefixValidation = validatePrefix(rawPrefix);
+        if (prefixValidation instanceof FieldValidation.Invalid<Prefix> invalid) {
+            return new ValidationResult.Rejected(invalid.error());
         }
-
-        final Prefix prefix;
-        try {
-            prefix = Prefix.parse(rawPrefix);
-        } catch (final PrefixParseException exception) {
-            return new ValidationResult.Rejected(new ValidationError.MalformedPrefix(exception.getMessage()));
-        }
+        final Prefix prefix = ((FieldValidation.Valid<Prefix>) prefixValidation).value();
 
         final PermissionNode permission = new PermissionNode(rawPermission);
         final Weight weight = new Weight(rawWeight);
@@ -45,12 +60,11 @@ public final class CatalogueRules {
             final String rawPrefix,
             final String rawPermission,
             final int rawWeight) {
-        final Prefix prefix;
-        try {
-            prefix = Prefix.parse(rawPrefix);
-        } catch (final PrefixParseException exception) {
-            return new ValidationResult.Rejected(new ValidationError.MalformedPrefix(exception.getMessage()));
+        final FieldValidation<Prefix> prefixValidation = validatePrefix(rawPrefix);
+        if (prefixValidation instanceof FieldValidation.Invalid<Prefix> invalid) {
+            return new ValidationResult.Rejected(invalid.error());
         }
+        final Prefix prefix = ((FieldValidation.Valid<Prefix>) prefixValidation).value();
 
         final PermissionNode permission = new PermissionNode(rawPermission);
         final Weight weight = new Weight(rawWeight);
