@@ -30,6 +30,7 @@ messages:
     cleared: "<green>Your <kind> has been cleared.</green>"
     # Placeholders: <name>
     tag-fallback: "<yellow>Your tag was no longer available, so you were switched to <name>.</yellow>"
+    tag-fallback-cleared: "<yellow>Your tag was no longer available and has been cleared.</yellow>"
     title-fallback-cleared: "<yellow>Your title was no longer available and has been cleared.</yellow>"
 
   selector:

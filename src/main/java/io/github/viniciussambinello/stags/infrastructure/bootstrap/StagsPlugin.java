@@ -15,6 +15,8 @@ import io.github.viniciussambinello.stags.application.service.SelectorService;
 import io.github.viniciussambinello.stags.application.usecase.ClearCosmetic;
 import io.github.viniciussambinello.stags.application.usecase.LoadPlayer;
 import io.github.viniciussambinello.stags.application.usecase.SelectCosmetic;
+import io.github.viniciussambinello.stags.infrastructure.authoring.AuthoringSessionStore;
+import io.github.viniciussambinello.stags.infrastructure.authoring.ChatAuthoringFlow;
 import io.github.viniciussambinello.stags.infrastructure.concurrent.MainThreadDispatcher;
 import io.github.viniciussambinello.stags.infrastructure.concurrent.MainThreadGuard;
 import io.github.viniciussambinello.stags.infrastructure.concurrent.StorageExecutor;
@@ -50,6 +52,9 @@ public final class StagsPlugin extends JavaPlugin {
     private final AtomicReference<BukkitTask> scheduledReconciliation;
     private final SelectorGateway selectorGateway;
     private final MenuSelector menuSelector;
+    private final AuthoringSessionStore authoringSessionStore;
+    private final ChatAuthoringFlow chatAuthoringFlow;
+    private final AtomicReference<BukkitTask> scheduledAuthoringSweep;
 
     public StagsPlugin() {
         this.storageExecutor = new StorageExecutor();
@@ -92,6 +97,12 @@ public final class StagsPlugin extends JavaPlugin {
         final ChatSelector chatSelector = new ChatSelector(
                 configService, selectorService, selectCosmetic, clearCosmetic, cooldownService, dispatcher, Clock.systemUTC());
         this.selectorGateway = new SelectorGateway(configService, menuSelector, chatSelector);
+
+        this.authoringSessionStore = new AuthoringSessionStore(Clock.systemUTC());
+        this.chatAuthoringFlow = new ChatAuthoringFlow(
+                configService, catalogueService, playerCosmeticService, activeCosmeticResolver, compositeCosmeticRenderer,
+                authoringSessionStore, dispatcher, getServer(), Clock.systemUTC());
+        this.scheduledAuthoringSweep = new AtomicReference<>();
     }
 
     @Override
@@ -106,6 +117,8 @@ public final class StagsPlugin extends JavaPlugin {
             getServer().getPluginManager().registerEvents(titleHologramRenderAdapter, this);
             getServer().getPluginManager().registerEvents(playerSessionListener, this);
             getServer().getPluginManager().registerEvents(menuSelector, this);
+            getServer().getPluginManager().registerEvents(chatAuthoringFlow, this);
+            scheduledAuthoringSweep.set(getServer().getScheduler().runTaskTimer(this, chatAuthoringFlow::sweepExpired, 100L, 100L));
             titleHologramRenderAdapter.cleanupOrphans();
             startOrStopReconciliation();
             getLogger().info("s-tags " + getPluginMeta().getVersion() + " enabled using the "
@@ -137,9 +150,13 @@ public final class StagsPlugin extends JavaPlugin {
 
     @Override
     public void onDisable() {
-        final BukkitTask existing = scheduledReconciliation.getAndSet(null);
-        if (existing != null) {
-            existing.cancel();
+        final BukkitTask existingReconciliation = scheduledReconciliation.getAndSet(null);
+        if (existingReconciliation != null) {
+            existingReconciliation.cancel();
+        }
+        final BukkitTask existingSweep = scheduledAuthoringSweep.getAndSet(null);
+        if (existingSweep != null) {
+            existingSweep.cancel();
         }
         getServer().getOnlinePlayers().forEach(compositeCosmeticRenderer::teardown);
         compositeCosmeticRenderer.shutdown();
@@ -170,5 +187,9 @@ public final class StagsPlugin extends JavaPlugin {
 
     public SelectorGateway selectorGateway() {
         return selectorGateway;
+    }
+
+    public ChatAuthoringFlow chatAuthoringFlow() {
+        return chatAuthoringFlow;
     }
 }
