@@ -21,6 +21,7 @@ import io.github.viniciussambinello.stags.infrastructure.render.NametagRenderAda
 import io.github.viniciussambinello.stags.infrastructure.render.PlayerSessionListener;
 import io.github.viniciussambinello.stags.infrastructure.render.ReconciliationTask;
 import io.github.viniciussambinello.stags.infrastructure.render.TabListRenderAdapter;
+import io.github.viniciussambinello.stags.infrastructure.render.TitleHologramRenderAdapter;
 import io.github.viniciussambinello.stags.infrastructure.storage.StorageBundle;
 import io.github.viniciussambinello.stags.infrastructure.storage.StorageFactory;
 
@@ -35,6 +36,7 @@ public final class StagsPlugin extends JavaPlugin {
     private final ActiveCosmeticResolver activeCosmeticResolver;
     private final CompositeCosmeticRenderer compositeCosmeticRenderer;
     private final ChatRenderAdapter chatRenderAdapter;
+    private final TitleHologramRenderAdapter titleHologramRenderAdapter;
     private final PlayerSessionListener playerSessionListener;
     private final ReconciliationTask reconciliationTask;
     private final AtomicReference<BukkitTask> scheduledReconciliation;
@@ -57,7 +59,9 @@ public final class StagsPlugin extends JavaPlugin {
         final NametagRenderAdapter nametagRenderAdapter =
                 new NametagRenderAdapter(configService, activeCosmeticResolver, getServer());
         final TabListRenderAdapter tabListRenderAdapter = new TabListRenderAdapter(configService, activeCosmeticResolver);
-        this.compositeCosmeticRenderer = new CompositeCosmeticRenderer(getServer(), nametagRenderAdapter, tabListRenderAdapter);
+        this.titleHologramRenderAdapter = new TitleHologramRenderAdapter(configService, activeCosmeticResolver, this);
+        this.compositeCosmeticRenderer = new CompositeCosmeticRenderer(
+                getServer(), nametagRenderAdapter, tabListRenderAdapter, titleHologramRenderAdapter);
         this.chatRenderAdapter = new ChatRenderAdapter(configService, activeCosmeticResolver);
 
         final LoadPlayer loadPlayer = new LoadPlayer(playerCosmeticService);
@@ -77,11 +81,22 @@ public final class StagsPlugin extends JavaPlugin {
                 return;
             }
             getServer().getPluginManager().registerEvents(chatRenderAdapter, this);
+            getServer().getPluginManager().registerEvents(titleHologramRenderAdapter, this);
             getServer().getPluginManager().registerEvents(playerSessionListener, this);
+            titleHologramRenderAdapter.cleanupOrphans();
             startOrStopReconciliation();
             getLogger().info("s-tags " + getPluginMeta().getVersion() + " enabled using the "
                     + storageBundle.activeBackend() + " storage backend.");
         }).join();
+    }
+
+    public ConfigService.ReloadOutcome reloadConfiguration() {
+        final ConfigService.ReloadOutcome outcome = configService.reload();
+        if (outcome instanceof ConfigService.ReloadOutcome.Success) {
+            getServer().getOnlinePlayers().forEach(player -> compositeCosmeticRenderer.refresh(player.getUniqueId()));
+            startOrStopReconciliation();
+        }
+        return outcome;
     }
 
     public void startOrStopReconciliation() {

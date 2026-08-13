@@ -14,9 +14,12 @@ public final class CompositeCosmeticRenderer implements CosmeticRenderer {
     private final List<TargetRenderer> targets;
 
     public CompositeCosmeticRenderer(
-            final Server server, final NametagRenderAdapter nametagRenderAdapter, final TabListRenderAdapter tabListRenderAdapter) {
+            final Server server,
+            final NametagRenderAdapter nametagRenderAdapter,
+            final TabListRenderAdapter tabListRenderAdapter,
+            final TitleHologramRenderAdapter titleHologramRenderAdapter) {
         this.server = server;
-        this.targets = List.of(nametagRenderAdapter, tabListRenderAdapter);
+        this.targets = List.of(nametagRenderAdapter, tabListRenderAdapter, titleHologramRenderAdapter);
     }
 
     @Override
@@ -34,5 +37,9 @@ public final class CompositeCosmeticRenderer implements CosmeticRenderer {
 
     public void shutdown() {
         targets.forEach(TargetRenderer::shutdown);
+    }
+
+    public void onViewerJoin(final Player viewer) {
+        targets.forEach(target -> target.onViewerJoin(viewer));
     }
 }
