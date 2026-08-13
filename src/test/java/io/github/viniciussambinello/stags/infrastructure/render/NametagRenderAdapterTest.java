@@ -103,7 +103,7 @@ final class NametagRenderAdapterTest {
         final Scoreboard scoreboard = mockScoreboard();
         final Server server = mockServer(scoreboard);
         final ConfigService configService = realConfigService(dir);
-        final NametagRenderAdapter adapter = new NametagRenderAdapter(configService, resolver, server);
+        final NametagRenderAdapter adapter = new NametagRenderAdapter(configService, resolver, new io.github.viniciussambinello.stags.infrastructure.placeholder.NoopPlaceholderResolver(), server);
         final Player player = mockPlayer(playerId, "Steve");
 
         adapter.refresh(player);
@@ -133,7 +133,7 @@ final class NametagRenderAdapterTest {
                 new ActiveCosmeticResolver(catalogueService, playerCosmeticService, new StubPermissionOracle());
         final Scoreboard scoreboard = mockScoreboard();
         final Server server = mockServer(scoreboard);
-        final NametagRenderAdapter adapter = new NametagRenderAdapter(bootstrap, resolver, server);
+        final NametagRenderAdapter adapter = new NametagRenderAdapter(bootstrap, resolver, new io.github.viniciussambinello.stags.infrastructure.placeholder.NoopPlaceholderResolver(), server);
         final Player player = mockPlayer(playerId, "Steve");
 
         adapter.refresh(player);

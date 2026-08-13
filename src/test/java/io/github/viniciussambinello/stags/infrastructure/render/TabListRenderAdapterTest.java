@@ -50,7 +50,7 @@ final class TabListRenderAdapterTest {
         final ActiveCosmeticResolver resolver = new ActiveCosmeticResolver(
                 catalogueService, playerCosmeticService, new StubPermissionOracle().grant(playerId, "stags.tag.vip"));
         final ConfigService configService = ConfigService.initial(dir, Logger.getLogger("test"));
-        final TabListRenderAdapter adapter = new TabListRenderAdapter(configService, resolver);
+        final TabListRenderAdapter adapter = new TabListRenderAdapter(configService, resolver, new io.github.viniciussambinello.stags.infrastructure.placeholder.NoopPlaceholderResolver());
 
         final Player player = Mockito.mock(Player.class);
         Mockito.when(player.getUniqueId()).thenReturn(playerId);
@@ -72,7 +72,7 @@ final class TabListRenderAdapterTest {
         final ActiveCosmeticResolver resolver =
                 new ActiveCosmeticResolver(catalogueService, playerCosmeticService, new StubPermissionOracle());
         final ConfigService configService = ConfigService.initial(dir, Logger.getLogger("test"));
-        final TabListRenderAdapter adapter = new TabListRenderAdapter(configService, resolver);
+        final TabListRenderAdapter adapter = new TabListRenderAdapter(configService, resolver, new io.github.viniciussambinello.stags.infrastructure.placeholder.NoopPlaceholderResolver());
 
         final Player player = Mockito.mock(Player.class);
         adapter.teardown(player);

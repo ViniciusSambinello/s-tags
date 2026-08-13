@@ -2,6 +2,7 @@ package io.github.viniciussambinello.stags.infrastructure.render;
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.bukkit.Server;
@@ -9,6 +10,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
 
+import io.github.viniciussambinello.stags.application.port.PlaceholderResolver;
 import io.github.viniciussambinello.stags.application.service.ActiveCosmeticResolver;
 import io.github.viniciussambinello.stags.domain.cosmetic.Cosmetic;
 import io.github.viniciussambinello.stags.domain.cosmetic.CosmeticKind;
@@ -20,13 +22,18 @@ public final class NametagRenderAdapter implements TargetRenderer {
 
     private final ConfigService configService;
     private final ActiveCosmeticResolver activeCosmeticResolver;
+    private final PlaceholderResolver placeholderResolver;
     private final Server server;
     private final Map<String, Team> managedTeams;
 
     public NametagRenderAdapter(
-            final ConfigService configService, final ActiveCosmeticResolver activeCosmeticResolver, final Server server) {
+            final ConfigService configService,
+            final ActiveCosmeticResolver activeCosmeticResolver,
+            final PlaceholderResolver placeholderResolver,
+            final Server server) {
         this.configService = configService;
         this.activeCosmeticResolver = activeCosmeticResolver;
+        this.placeholderResolver = placeholderResolver;
         this.server = server;
         this.managedTeams = new ConcurrentHashMap<>();
     }
@@ -43,7 +50,7 @@ public final class NametagRenderAdapter implements TargetRenderer {
         }
         final Optional<Cosmetic> activeTag = activeCosmeticResolver.activeCosmetic(player.getUniqueId(), CosmeticKind.TAG);
         removeFromManagedTeam(player);
-        activeTag.ifPresent(tag -> teamFor(tag).addEntry(player.getName()));
+        activeTag.ifPresent(tag -> teamFor(tag, player.getUniqueId()).addEntry(player.getName()));
     }
 
     @Override
@@ -64,14 +71,14 @@ public final class NametagRenderAdapter implements TargetRenderer {
         }
     }
 
-    private Team teamFor(final Cosmetic tag) {
+    private Team teamFor(final Cosmetic tag, final UUID wearingPlayerId) {
         final String name = teamName(tag);
         final Team team = managedTeams.computeIfAbsent(name, key -> {
             final Scoreboard scoreboard = scoreboard();
             final Team existing = scoreboard.getTeam(key);
             return existing != null ? existing : scoreboard.registerNewTeam(key);
         });
-        team.prefix(tag.prefix().rendered());
+        team.prefix(placeholderResolver.resolve(tag.prefix(), wearingPlayerId));
         return team;
     }
 

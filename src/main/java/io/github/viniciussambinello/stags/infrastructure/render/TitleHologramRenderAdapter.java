@@ -25,6 +25,7 @@ import org.bukkit.util.Transformation;
 import org.joml.AxisAngle4f;
 import org.joml.Vector3f;
 
+import io.github.viniciussambinello.stags.application.port.PlaceholderResolver;
 import io.github.viniciussambinello.stags.application.service.ActiveCosmeticResolver;
 import io.github.viniciussambinello.stags.domain.cosmetic.Cosmetic;
 import io.github.viniciussambinello.stags.domain.cosmetic.CosmeticKind;
@@ -35,6 +36,7 @@ public final class TitleHologramRenderAdapter implements TargetRenderer, Listene
 
     private final ConfigService configService;
     private final ActiveCosmeticResolver activeCosmeticResolver;
+    private final PlaceholderResolver placeholderResolver;
     private final Plugin plugin;
     private final Server server;
     private final NamespacedKey markerKey;
@@ -42,9 +44,13 @@ public final class TitleHologramRenderAdapter implements TargetRenderer, Listene
     private final Map<UUID, TextDisplay> holograms;
 
     public TitleHologramRenderAdapter(
-            final ConfigService configService, final ActiveCosmeticResolver activeCosmeticResolver, final Plugin plugin) {
+            final ConfigService configService,
+            final ActiveCosmeticResolver activeCosmeticResolver,
+            final PlaceholderResolver placeholderResolver,
+            final Plugin plugin) {
         this.configService = configService;
         this.activeCosmeticResolver = activeCosmeticResolver;
+        this.placeholderResolver = placeholderResolver;
         this.plugin = plugin;
         this.server = plugin.getServer();
         this.markerKey = new NamespacedKey("s-tags", "title-hologram");
@@ -75,7 +81,7 @@ public final class TitleHologramRenderAdapter implements TargetRenderer, Listene
             player.addPassenger(display);
         }
 
-        display.text(activeTitle.get().prefix().rendered());
+        display.text(placeholderResolver.resolve(activeTitle.get().prefix(), player.getUniqueId()));
         applyOffset(display, config.verticalOffset());
         applyVisibility(player, display, config.selfVisible());
     }
