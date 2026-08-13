@@ -338,11 +338,13 @@ public final class ChatAuthoringFlow implements Listener {
     }
 
     private Integer parseWeight(final String rawInput) {
+        final int weight;
         try {
-            return Integer.parseInt(rawInput.trim());
+            weight = Integer.parseInt(rawInput.trim());
         } catch (final NumberFormatException exception) {
             return null;
         }
+        return weight < 0 ? null : weight;
     }
 
     private String defaultPermission(final CosmeticKind kind, final CosmeticId id) {
@@ -371,6 +373,7 @@ public final class ChatAuthoringFlow implements Listener {
             case ValidationError.MalformedPrefix malformed ->
                     sendMessage(player, "authoring.error-invalid-prefix",
                             Placeholder.component("reason", Component.text(malformed.reason())));
+            case ValidationError.InvalidWeight _ -> sendMessage(player, "authoring.error-invalid-weight");
         }
     }
 

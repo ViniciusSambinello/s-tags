@@ -70,4 +70,12 @@ final class CatalogueRulesTest {
         assertInstanceOf(ValidationResult.Rejected.class, result);
         assertInstanceOf(ValidationError.MalformedPrefix.class, ((ValidationResult.Rejected) result).error());
     }
+
+    @Test
+    void rejectsNegativeWeight() {
+        final ValidationResult result = rules.validateNew(
+                CosmeticKind.TAG, "vip", "<gold>[VIP]</gold>", "stags.tag.vip", -1, Catalogue.empty());
+        assertInstanceOf(ValidationResult.Rejected.class, result);
+        assertInstanceOf(ValidationError.InvalidWeight.class, ((ValidationResult.Rejected) result).error());
+    }
 }
