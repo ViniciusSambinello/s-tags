@@ -55,6 +55,8 @@ public final class StagsPlugin extends JavaPlugin {
     private final AuthoringSessionStore authoringSessionStore;
     private final ChatAuthoringFlow chatAuthoringFlow;
     private final AtomicReference<BukkitTask> scheduledAuthoringSweep;
+    private final SelectCosmetic selectCosmetic;
+    private final MainThreadDispatcher dispatcher;
 
     public StagsPlugin() {
         this.storageExecutor = new StorageExecutor();
@@ -80,7 +82,7 @@ public final class StagsPlugin extends JavaPlugin {
         this.chatRenderAdapter = new ChatRenderAdapter(configService, activeCosmeticResolver);
 
         final LoadPlayer loadPlayer = new LoadPlayer(playerCosmeticService);
-        final MainThreadDispatcher dispatcher = new MainThreadDispatcher(this);
+        this.dispatcher = new MainThreadDispatcher(this);
         this.playerSessionListener =
                 new PlayerSessionListener(loadPlayer, playerCosmeticService, compositeCosmeticRenderer, dispatcher);
         this.reconciliationTask = new ReconciliationTask(getServer(), compositeCosmeticRenderer);
@@ -88,7 +90,7 @@ public final class StagsPlugin extends JavaPlugin {
 
         final SelectorService selectorService =
                 new SelectorService(catalogueService, playerCosmeticService, permissionOracle);
-        final SelectCosmetic selectCosmetic =
+        this.selectCosmetic =
                 new SelectCosmetic(catalogueService, playerCosmeticService, permissionOracle, compositeCosmeticRenderer);
         final ClearCosmetic clearCosmetic = new ClearCosmetic(playerCosmeticService, compositeCosmeticRenderer);
         final SelectorCooldownService cooldownService = new SelectorCooldownService(Clock.systemUTC());
@@ -191,5 +193,17 @@ public final class StagsPlugin extends JavaPlugin {
 
     public ChatAuthoringFlow chatAuthoringFlow() {
         return chatAuthoringFlow;
+    }
+
+    public ActiveCosmeticResolver activeCosmeticResolver() {
+        return activeCosmeticResolver;
+    }
+
+    public SelectCosmetic selectCosmetic() {
+        return selectCosmetic;
+    }
+
+    public MainThreadDispatcher mainThreadDispatcher() {
+        return dispatcher;
     }
 }

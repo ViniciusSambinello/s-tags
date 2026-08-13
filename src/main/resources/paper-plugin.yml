@@ -13,3 +13,32 @@ dependencies:
       load: BEFORE
       required: false
       join-classpath: true
+
+permissions:
+  stags.command.tag:
+    description: Open the tag selector.
+    default: true
+  stags.command.title:
+    description: Open the title selector.
+    default: true
+  stags.admin.create:
+    description: Create a new tag or title.
+    default: op
+  stags.admin.edit:
+    description: Edit an existing tag or title.
+    default: op
+  stags.admin.delete:
+    description: Delete a tag or title.
+    default: op
+  stags.admin.list:
+    description: List every defined tag or title.
+    default: op
+  stags.admin.force:
+    description: Force a player's active tag or title selection.
+    default: op
+  stags.admin.reload:
+    description: Reload config.yml and messages.yml.
+    default: op
+  stags.chat.format:
+    description: Have MiniMessage/legacy markup in chat messages formatted rather than shown literally.
+    default: op
