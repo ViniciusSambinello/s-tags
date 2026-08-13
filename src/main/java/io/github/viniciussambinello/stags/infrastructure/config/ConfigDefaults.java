@@ -39,7 +39,7 @@ public final class ConfigDefaults {
     public static final int COOLDOWN_SELECT_SECONDS = 2;
 
     public static final boolean CHAT_RENDER_ENABLED = true;
-    public static final String CHAT_RENDER_FORMAT = "<tag_prefix> <white><player></white><gray>:</gray> <message>";
+    public static final String CHAT_RENDER_FORMAT = "<tag_prefix><white><player></white><gray>:</gray> <message>";
     public static final String CHAT_FORMATTING_PERMISSION = "stags.chat.format";
 
     public static final boolean NAMETAG_ENABLED = true;

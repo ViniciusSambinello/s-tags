@@ -8,13 +8,13 @@ import io.github.viniciussambinello.stags.domain.cosmetic.Cosmetic;
 import io.github.viniciussambinello.stags.domain.cosmetic.CosmeticKind;
 import io.github.viniciussambinello.stags.domain.player.CosmeticOwnership;
 
-final class OwnershipCheck {
+public final class OwnershipCheck {
 
-    static boolean owns(final PermissionOracle oracle, final UUID playerId, final Cosmetic cosmetic) {
+    public static boolean owns(final PermissionOracle oracle, final UUID playerId, final Cosmetic cosmetic) {
         return cosmetic.permission().isEmpty() || oracle.hasPermission(playerId, cosmetic.permission().value());
     }
 
-    static CosmeticOwnership asOwnership(
+    public static CosmeticOwnership asOwnership(
             final PermissionOracle oracle, final UUID playerId, final Catalogue catalogue, final CosmeticKind kind) {
         return cosmeticId -> catalogue.find(kind, cosmeticId)
                 .map(cosmetic -> owns(oracle, playerId, cosmetic))
