@@ -8,6 +8,7 @@ import org.bukkit.event.Listener;
 
 import io.papermc.paper.event.player.AsyncChatEvent;
 
+import io.github.viniciussambinello.stags.application.port.PlaceholderResolver;
 import io.github.viniciussambinello.stags.application.service.ActiveCosmeticResolver;
 import io.github.viniciussambinello.stags.domain.cosmetic.Cosmetic;
 import io.github.viniciussambinello.stags.domain.cosmetic.CosmeticKind;
@@ -22,10 +23,15 @@ public final class ChatRenderAdapter implements Listener {
 
     private final ConfigService configService;
     private final ActiveCosmeticResolver activeCosmeticResolver;
+    private final PlaceholderResolver placeholderResolver;
 
-    public ChatRenderAdapter(final ConfigService configService, final ActiveCosmeticResolver activeCosmeticResolver) {
+    public ChatRenderAdapter(
+            final ConfigService configService,
+            final ActiveCosmeticResolver activeCosmeticResolver,
+            final PlaceholderResolver placeholderResolver) {
         this.configService = configService;
         this.activeCosmeticResolver = activeCosmeticResolver;
+        this.placeholderResolver = placeholderResolver;
     }
 
     @EventHandler
@@ -37,7 +43,7 @@ public final class ChatRenderAdapter implements Listener {
         final Player sender = event.getPlayer();
         final Optional<Cosmetic> activeTag = activeCosmeticResolver.activeCosmetic(sender.getUniqueId(), CosmeticKind.TAG);
         final Component tagPrefix = activeTag
-                .map(tag -> tag.prefix().rendered().append(Component.space()))
+                .map(tag -> placeholderResolver.resolve(tag.prefix(), sender.getUniqueId()).append(Component.space()))
                 .orElse(Component.empty());
 
         final String format = configService.config().render().chat().format();

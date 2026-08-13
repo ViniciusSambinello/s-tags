@@ -22,6 +22,8 @@ import io.github.viniciussambinello.stags.infrastructure.concurrent.MainThreadGu
 import io.github.viniciussambinello.stags.infrastructure.concurrent.StorageExecutor;
 import io.github.viniciussambinello.stags.infrastructure.config.ConfigService;
 import io.github.viniciussambinello.stags.infrastructure.permission.BukkitPermissionOracle;
+import io.github.viniciussambinello.stags.infrastructure.placeholder.PlaceholderApiIntegration;
+import io.github.viniciussambinello.stags.infrastructure.placeholder.PlaceholderResolverHolder;
 import io.github.viniciussambinello.stags.infrastructure.render.ChatRenderAdapter;
 import io.github.viniciussambinello.stags.infrastructure.render.CompositeCosmeticRenderer;
 import io.github.viniciussambinello.stags.infrastructure.render.NametagRenderAdapter;
@@ -57,6 +59,8 @@ public final class StagsPlugin extends JavaPlugin {
     private final AtomicReference<BukkitTask> scheduledAuthoringSweep;
     private final SelectCosmetic selectCosmetic;
     private final MainThreadDispatcher dispatcher;
+    private final PlaceholderResolverHolder placeholderResolverHolder;
+    private final PlaceholderApiIntegration placeholderApiIntegration;
 
     public StagsPlugin() {
         this.storageExecutor = new StorageExecutor();
@@ -72,14 +76,17 @@ public final class StagsPlugin extends JavaPlugin {
         this.playerCosmeticService = new PlayerCosmeticService(storageBundle.selectionRepository());
         this.permissionOracle = new BukkitPermissionOracle(getServer());
         this.activeCosmeticResolver = new ActiveCosmeticResolver(catalogueService, playerCosmeticService, permissionOracle);
+        this.placeholderResolverHolder = new PlaceholderResolverHolder();
 
         final NametagRenderAdapter nametagRenderAdapter =
-                new NametagRenderAdapter(configService, activeCosmeticResolver, getServer());
-        final TabListRenderAdapter tabListRenderAdapter = new TabListRenderAdapter(configService, activeCosmeticResolver);
-        this.titleHologramRenderAdapter = new TitleHologramRenderAdapter(configService, activeCosmeticResolver, this);
+                new NametagRenderAdapter(configService, activeCosmeticResolver, placeholderResolverHolder, getServer());
+        final TabListRenderAdapter tabListRenderAdapter =
+                new TabListRenderAdapter(configService, activeCosmeticResolver, placeholderResolverHolder);
+        this.titleHologramRenderAdapter =
+                new TitleHologramRenderAdapter(configService, activeCosmeticResolver, placeholderResolverHolder, this);
         this.compositeCosmeticRenderer = new CompositeCosmeticRenderer(
                 getServer(), nametagRenderAdapter, tabListRenderAdapter, titleHologramRenderAdapter);
-        this.chatRenderAdapter = new ChatRenderAdapter(configService, activeCosmeticResolver);
+        this.chatRenderAdapter = new ChatRenderAdapter(configService, activeCosmeticResolver, placeholderResolverHolder);
 
         final LoadPlayer loadPlayer = new LoadPlayer(playerCosmeticService);
         this.dispatcher = new MainThreadDispatcher(this);
@@ -105,27 +112,36 @@ public final class StagsPlugin extends JavaPlugin {
                 configService, catalogueService, playerCosmeticService, activeCosmeticResolver, compositeCosmeticRenderer,
                 authoringSessionStore, dispatcher, getServer(), Clock.systemUTC());
         this.scheduledAuthoringSweep = new AtomicReference<>();
+
+        this.placeholderApiIntegration = new PlaceholderApiIntegration(
+                getServer(), getLogger(), placeholderResolverHolder, getPluginMeta().getVersion(),
+                activeCosmeticResolver, catalogueService, permissionOracle);
     }
 
     @Override
     public void onEnable() {
-        catalogueService.loadInitial().whenComplete((unused, throwable) -> {
-            if (throwable != null) {
-                getLogger().severe("Failed to load the cosmetic catalogue: " + throwable.getMessage());
-                getServer().getPluginManager().disablePlugin(this);
-                return;
-            }
-            getServer().getPluginManager().registerEvents(chatRenderAdapter, this);
-            getServer().getPluginManager().registerEvents(titleHologramRenderAdapter, this);
-            getServer().getPluginManager().registerEvents(playerSessionListener, this);
-            getServer().getPluginManager().registerEvents(menuSelector, this);
-            getServer().getPluginManager().registerEvents(chatAuthoringFlow, this);
-            scheduledAuthoringSweep.set(getServer().getScheduler().runTaskTimer(this, chatAuthoringFlow::sweepExpired, 100L, 100L));
-            titleHologramRenderAdapter.cleanupOrphans();
-            startOrStopReconciliation();
-            getLogger().info("s-tags " + getPluginMeta().getVersion() + " enabled using the "
-                    + storageBundle.activeBackend() + " storage backend.");
-        }).join();
+        final Throwable loadFailure = catalogueService.loadInitial()
+                .handle((unused, throwable) -> throwable)
+                .join();
+
+        if (loadFailure != null) {
+            getLogger().severe("Failed to load the cosmetic catalogue: " + loadFailure.getMessage());
+            getServer().getPluginManager().disablePlugin(this);
+            return;
+        }
+
+        getServer().getPluginManager().registerEvents(chatRenderAdapter, this);
+        getServer().getPluginManager().registerEvents(titleHologramRenderAdapter, this);
+        getServer().getPluginManager().registerEvents(playerSessionListener, this);
+        getServer().getPluginManager().registerEvents(menuSelector, this);
+        getServer().getPluginManager().registerEvents(chatAuthoringFlow, this);
+        getServer().getPluginManager().registerEvents(placeholderApiIntegration, this);
+        scheduledAuthoringSweep.set(getServer().getScheduler().runTaskTimer(this, chatAuthoringFlow::sweepExpired, 100L, 100L));
+        placeholderApiIntegration.activateIfPresent();
+        titleHologramRenderAdapter.cleanupOrphans();
+        startOrStopReconciliation();
+        getLogger().info("s-tags " + getPluginMeta().getVersion() + " enabled using the "
+                + storageBundle.activeBackend() + " storage backend.");
     }
 
     public ConfigService.ReloadOutcome reloadConfiguration() {

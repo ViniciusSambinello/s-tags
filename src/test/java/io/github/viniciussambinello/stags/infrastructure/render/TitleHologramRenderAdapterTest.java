@@ -117,7 +117,7 @@ final class TitleHologramRenderAdapterTest {
         Mockito.when(owner.canSee(owner)).thenReturn(true);
 
         final ConfigService configService = ConfigService.initial(dir, Logger.getLogger("test"));
-        final TitleHologramRenderAdapter adapter = new TitleHologramRenderAdapter(configService, resolver, plugin);
+        final TitleHologramRenderAdapter adapter = new TitleHologramRenderAdapter(configService, resolver, new io.github.viniciussambinello.stags.infrastructure.placeholder.NoopPlaceholderResolver(), plugin);
 
         adapter.refresh(owner);
 
@@ -148,7 +148,7 @@ final class TitleHologramRenderAdapterTest {
         Files.writeString(configFile, content, StandardCharsets.UTF_8);
         configService.reload();
 
-        final TitleHologramRenderAdapter adapter = new TitleHologramRenderAdapter(configService, resolver, plugin);
+        final TitleHologramRenderAdapter adapter = new TitleHologramRenderAdapter(configService, resolver, new io.github.viniciussambinello.stags.infrastructure.placeholder.NoopPlaceholderResolver(), plugin);
 
         adapter.refresh(owner);
 
@@ -168,7 +168,7 @@ final class TitleHologramRenderAdapterTest {
         final Player owner = mockPlayer(playerId, "Steve", world);
 
         final ConfigService configService = ConfigService.initial(dir, Logger.getLogger("test"));
-        final TitleHologramRenderAdapter adapter = new TitleHologramRenderAdapter(configService, resolver, plugin);
+        final TitleHologramRenderAdapter adapter = new TitleHologramRenderAdapter(configService, resolver, new io.github.viniciussambinello.stags.infrastructure.placeholder.NoopPlaceholderResolver(), plugin);
 
         adapter.refresh(owner);
 
@@ -180,7 +180,7 @@ final class TitleHologramRenderAdapterTest {
         final Plugin plugin = mockPlugin();
         final Server server = plugin.getServer();
         final ConfigService configService = ConfigService.initial(Files.createTempDirectory("hologram-test"), Logger.getLogger("test"));
-        final TitleHologramRenderAdapter adapter = new TitleHologramRenderAdapter(configService, null, plugin);
+        final TitleHologramRenderAdapter adapter = new TitleHologramRenderAdapter(configService, null, new io.github.viniciussambinello.stags.infrastructure.placeholder.NoopPlaceholderResolver(), plugin);
 
         final Chunk chunk = Mockito.mock(Chunk.class);
         final TextDisplay orphaned = mockDisplay();

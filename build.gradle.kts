@@ -21,6 +21,7 @@ dependencies {
     implementation(libs.mysql.connector.j)
 
     testImplementation(libs.paper.api)
+    testImplementation(libs.placeholderapi)
     testImplementation(libs.junit.jupiter)
     testImplementation(libs.mockito.core)
     testImplementation(libs.mockito.junit.jupiter)
