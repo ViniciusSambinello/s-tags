@@ -58,7 +58,10 @@ render:
   chat:
     enabled: true
     # Placeholders: <tag_prefix> <player> <message>
-    format: "<tag_prefix> <white><player></white><gray>:</gray> <message>"
+    # <tag_prefix> already includes its own trailing space when a tag is
+    # active, and resolves to nothing at all when it is not - do not add a
+    # literal space after it here, or an empty tag leaves a leading gap.
+    format: "<tag_prefix><white><player></white><gray>:</gray> <message>"
     # Permission required for a player's own message body to be formatted.
     formatting-permission: stags.chat.format
 
