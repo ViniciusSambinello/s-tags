@@ -25,14 +25,14 @@
 
 ## 3. Domain model — branch `feature/domain-model` → `develop`
 
-- [ ] 3.1 Implement `CosmeticKind` (`TAG`, `TITLE`) and `CosmeticId` as a record validating the identifier alphabet, 1–32 length and case-insensitive normalization, rejecting malformed input at construction
-- [ ] 3.2 Implement `Weight` and `Prefix` value records, with `Prefix` carrying the raw MiniMessage source, the pre-parsed `Component` and the placeholder-bearing flag
-- [ ] 3.3 Implement the `Cosmetic` record (`kind`, `id`, `prefix`, `permission`, `weight`) with defensive copying and no setters
-- [ ] 3.4 Implement `Selection` as a sealed interface permitting `Unset`, `Active(CosmeticId)` and `Cleared`, and `PlayerCosmetics` holding one `Selection` per kind
-- [ ] 3.5 Implement `Catalogue` as an immutable snapshot exposing full and per-kind listings pre-sorted by descending weight then ascending identifier, plus O(1) id lookup, with `withCosmetic` / `withoutCosmetic` returning new snapshots
-- [ ] 3.6 Implement `CatalogueRules` centralizing identifier-uniqueness, prefix-parse and weight validation, returning a typed result rather than throwing, so authoring and the repository share one implementation
-- [ ] 3.7 Implement `ResolveActiveCosmetic` covering the tag default/fallback rule, the title no-default rule, and the weight-then-identifier tie-break
-- [ ] 3.8 Write unit tests for identifier validation, catalogue ordering and tie-breaks, tag fallback, title clear-on-loss, and `Selection` exhaustiveness, and confirm the domain module compiles with no Bukkit import on the classpath
+- [x] 3.1 Implement `CosmeticKind` (`TAG`, `TITLE`) and `CosmeticId` as a record validating the identifier alphabet, 1–32 length and case-insensitive normalization, rejecting malformed input at construction
+- [x] 3.2 Implement `Weight` and `Prefix` value records, with `Prefix` carrying the raw MiniMessage source, the pre-parsed `Component` and the placeholder-bearing flag
+- [x] 3.3 Implement the `Cosmetic` record (`kind`, `id`, `prefix`, `permission`, `weight`) with defensive copying and no setters
+- [x] 3.4 Implement `Selection` as a sealed interface permitting `Unset`, `Active(CosmeticId)` and `Cleared`, and `PlayerCosmetics` holding one `Selection` per kind
+- [x] 3.5 Implement `Catalogue` as an immutable snapshot exposing full and per-kind listings pre-sorted by descending weight then ascending identifier, plus O(1) id lookup, with `withCosmetic` / `withoutCosmetic` returning new snapshots (backed by a parallel `Map<CosmeticKind, Map<CosmeticId, Cosmetic>>` index)
+- [x] 3.6 Implement `CatalogueRules` centralizing identifier-uniqueness, prefix-parse and weight validation, returning a typed result rather than throwing, so authoring and the repository share one implementation
+- [x] 3.7 Implement `ResolveActiveCosmetic` covering the tag default/fallback rule, the title no-default rule, and the weight-then-identifier tie-break
+- [x] 3.8 Write unit tests for identifier validation, catalogue ordering and tie-breaks, tag fallback, title clear-on-loss, and `Selection` exhaustiveness, and confirm the domain module compiles with no Bukkit import on the classpath (28 tests, all passing; `grep -r org.bukkit/io.papermc` under `domain/` returns nothing)
 
 ## 4. Configuration and messages — branch `feature/configuration` → `develop`
 

@@ -20,6 +20,7 @@ dependencies {
     implementation(libs.hikaricp)
     implementation(libs.mysql.connector.j)
 
+    testImplementation(libs.paper.api)
     testImplementation(libs.junit.jupiter)
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
