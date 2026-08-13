@@ -81,7 +81,15 @@ between backends.
 
 Owning a specific tag or title is controlled by that cosmetic's own
 `permission` field (for example `stags.tag.vip`), configured per-entry when
-the cosmetic is created. See [`design.md`](openspec/changes/add-tag-and-title-system/design.md)
+the cosmetic is created.
+
+One further permission is not tied to a command: `stags.chat.format`
+(default `op`) lets a player's own MiniMessage or legacy color markup in
+their chat message body be rendered instead of shown literally. Without it,
+a player's raw `<red>` or `&c`-style input is inserted into chat as plain
+text.
+
+See [`design.md`](openspec/changes/add-tag-and-title-system/design.md)
 for the full architecture and [`specs/`](openspec/changes/add-tag-and-title-system/specs)
 for the complete behavior contract.
 

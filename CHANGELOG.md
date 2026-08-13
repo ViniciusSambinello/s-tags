@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.0] - 2026-08-13
+
 ### Added
 
 - Tag system: operator-defined chat/nametag/tab-list prefixes, owned through
@@ -25,3 +27,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   placeholder resolution inside cosmetic prefixes.
 - Fully externalized `config.yml` and `messages.yml`, both reloadable at
   runtime.
+
+[Unreleased]: https://github.com/ViniciusSambinello/s-tags/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/ViniciusSambinello/s-tags/releases/tag/v0.1.0

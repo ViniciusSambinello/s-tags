@@ -178,9 +178,13 @@ Verified live end to end against a real Paper 26.2 server via console: `/tag` an
 
 ## 15. Release 0.1.0 — branch `release/0.1.0` → `main` and `develop`
 
-- [ ] 15.1 Cut `release/0.1.0` from `develop` and confirm the project version reads `0.1.0` in `build.gradle.kts` and in the built `paper-plugin.yml`
-- [ ] 15.2 Finalize `CHANGELOG.md` for 0.1.0, moving the `Unreleased` entries into a dated release section
-- [ ] 15.3 Complete `README.md`: requirements, installation, both backends with example configuration, the command and permission table, the configuration reference, and the PlaceholderAPI placeholder list
-- [ ] 15.4 Verify the released jar on a clean Paper 26.2 server with an empty data folder and no database, confirming a working default install out of the box
+- [x] 15.1 Cut `release/0.1.0` from `develop` and confirm the project version reads `0.1.0` in `build.gradle.kts` and in the built `paper-plugin.yml`
+  - Branch cut from `develop`. `build.gradle.kts` reads `version = "0.1.0"`; `paper-plugin.yml`'s `version: '${version}'` placeholder is expanded by `processResources`, confirmed on every live boot this session ("Loading server plugin s-tags v0.1.0" / "s-tags 0.1.0 enabled...").
+- [x] 15.2 Finalize `CHANGELOG.md` for 0.1.0, moving the `Unreleased` entries into a dated release section
+  - `## [Unreleased]` entries moved under `## [0.1.0] - 2026-08-13`, leaving `[Unreleased]` empty for future work. Added Keep-a-Changelog-style compare/tag reference links at the bottom.
+- [x] 15.3 Complete `README.md`: requirements, installation, both backends with example configuration, the command and permission table, the configuration reference, and the PlaceholderAPI placeholder list
+  - The README already covered requirements, installation, both storage backends with example YAML, the command/permission table, a configuration reference and the full placeholder list. Found and fixed one gap: `stags.chat.format` — a real, declared permission (governs whether a player's own chat markup renders instead of showing literally) — was never mentioned anywhere in the document. Added a short paragraph documenting it alongside the command/permission table.
+- [x] 15.4 Verify the released jar on a clean Paper 26.2 server with an empty data folder and no database, confirming a working default install out of the box
+  - Live-verified on a brand-new Paper 26.2 server instance (fresh world, empty `plugins/` beyond the jar, no MySQL configured or running): the plugin enabled cleanly on first boot, auto-generated a complete, well-formed, self-documenting `config.yml` (97 lines) and `messages.yml` (80 lines) under `plugins/s-tags/`, defaulted to the YAML storage backend with zero configuration required, and shut down cleanly on `/stop`. No errors, no exceptions, no manual setup step needed beyond dropping in the jar.
 - [ ] 15.5 Merge `release/0.1.0` into `main`, tag `v0.1.0`, and confirm the release workflow attaches the shaded jar
 - [ ] 15.6 Merge `release/0.1.0` back into `develop` and delete the release branch
