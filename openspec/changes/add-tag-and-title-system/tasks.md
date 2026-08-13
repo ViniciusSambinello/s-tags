@@ -46,12 +46,12 @@
 
 ## 5. Concurrency and storage ports — branch `feature/storage-core` → `develop`
 
-- [ ] 5.1 Define the `CosmeticRepository` and `SelectionRepository` ports returning `CompletableFuture`, plus `PermissionOracle`, `MessageSource` and `Clock` ports
-- [ ] 5.2 Implement `StorageExecutor` as a single named-thread executor with bounded-await shutdown, and `MainThreadDispatcher` wrapping the Bukkit scheduler
-- [ ] 5.3 Implement `CatalogueService` holding the catalogue in an `AtomicReference`, loading once at startup, serializing all mutations on the storage thread, and updating memory only after a successful write
-- [ ] 5.4 Implement `PlayerCosmeticService` with a `ConcurrentHashMap<UUID, PlayerCosmetics>` of immutable values, loading on join, flushing pending writes and releasing on quit, and skipping redundant writes when the selected value is already active
-- [ ] 5.5 Implement `SelectCosmetic`, `ClearCosmetic` and `LoadPlayer` use cases against the ports, including the not-owned, unknown-cosmetic and storage-failure paths
-- [ ] 5.6 Add an assertion or debug guard that fails loudly if a repository method is invoked on the main thread, and verify it stays silent through a full join/select/quit cycle
+- [x] 5.1 Define the `CosmeticRepository` and `SelectionRepository` ports returning `CompletableFuture`, plus `PermissionOracle` and `MessageSource` ports (`Clock` intentionally omitted — `java.time.Clock` already is exactly this port, with `systemUTC()`/`fixed()` factories for production/tests; reusing it avoids reinventing an identical abstraction)
+- [x] 5.2 Implement `StorageExecutor` as a single named-thread executor with bounded-await shutdown, and `MainThreadDispatcher` wrapping the Bukkit scheduler
+- [x] 5.3 Implement `CatalogueService` holding the catalogue in an `AtomicReference`, loading once at startup, serializing all mutations on the storage thread, and updating memory only after a successful write (uniqueness race closed via `CosmeticRepository.insert` returning `CREATED`/`DUPLICATE`, verified by an 8-thread concurrent-create test: exactly 1 accepted, 7 duplicates)
+- [x] 5.4 Implement `PlayerCosmeticService` with a `ConcurrentHashMap<UUID, PlayerCosmetics>` of immutable values, loading on join, flushing pending writes and releasing on quit, and skipping redundant writes when the selected value is already active (`awaitPending(UUID)` exposed for the quit handler to await in Group 8, since a repository write is asynchronous and must complete before the cache entry is released)
+- [x] 5.5 Implement `SelectCosmetic`, `ClearCosmetic` and `LoadPlayer` use cases against the ports, including the not-owned, unknown-cosmetic and storage-failure paths
+- [x] 5.6 Add an assertion or debug guard (`MainThreadGuard.assertOffMainThread`) that fails loudly if a repository method is invoked on the main thread. To be wired into the concrete repository adapters starting Group 6/7 (nothing calls real storage yet); the join/select/quit cycle is verified end-to-end once a real adapter exists
 
 ## 6. YAML storage backend — branch `feature/persistence-yaml` → `develop`
 
