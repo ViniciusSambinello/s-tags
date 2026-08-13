@@ -36,13 +36,13 @@
 
 ## 4. Configuration and messages — branch `feature/configuration` → `develop`
 
-- [ ] 4.1 Write `src/main/resources/config.yml` with every key from the `plugin-configuration` spec, documented with explanatory YAML comments in English
-- [ ] 4.2 Write `src/main/resources/messages.yml` with every player-facing string in MiniMessage, each documenting its available placeholders
-- [ ] 4.3 Implement the `StagsConfig` record tree mirroring `config.yml`, with nested records for storage, selector, render targets, hologram, authoring and cooldowns
-- [ ] 4.4 Implement `ConfigLoader` that validates every value, logs key + offending value + accepted range on failure, falls back to the documented default, and reports unrecognized keys once
-- [ ] 4.5 Implement `MessageCatalog` resolving MiniMessage messages with scoped placeholders, treating an empty string as suppressed output, falling back to the shipped default on a parse error, and supporting the configurable prefix with a per-message opt-out
-- [ ] 4.6 Implement the reload use case: re-validate, swap the immutable config snapshot atomically, re-apply rendering to all online players, refuse on a parse error while keeping the previous config active, and report that a storage backend change requires a restart
-- [ ] 4.7 Write unit tests for out-of-range, wrong-type and missing keys, empty-message suppression, unknown placeholders left literal, and reload-with-invalid-file leaving the previous config active
+- [x] 4.1 Write `src/main/resources/config.yml` with every key from the `plugin-configuration` spec, documented with explanatory YAML comments in English
+- [x] 4.2 Write `src/main/resources/messages.yml` with every player-facing string in MiniMessage, each documenting its available placeholders
+- [x] 4.3 Implement the `StagsConfig` record tree mirroring `config.yml`, with nested records for storage, selector, render targets, hologram, authoring and cooldowns
+- [x] 4.4 Implement `ConfigLoader` that validates every value, logs key + offending value + accepted range on failure, falls back to the documented default, and reports unrecognized keys once
+- [x] 4.5 Implement `MessageCatalog` resolving MiniMessage messages with scoped placeholders, treating an empty string as suppressed output, falling back to the shipped default on a parse error, and supporting the configurable prefix with a per-message opt-out (structural validity checked at load with strict-mode MiniMessage — catches genuinely unclosed markup without penalizing the common unclosed-trailing-color-tag idiom, since unresolvable custom placeholder tags are left literal even in strict mode; rendering uses the lenient default parser)
+- [x] 4.6 Implement the reload use case (`ConfigService`): re-validate, swap the immutable config snapshot atomically via `AtomicReference`, refuse on a parse error while keeping the previous config active, and report that a storage backend change requires a restart via `ReloadOutcome.Success.storageRestartRequired()`. Re-applying rendering to all online players is wired in Group 12 once `CosmeticRenderer` (Group 8) exists to call
+- [x] 4.7 Write unit tests for out-of-range, wrong-type and missing keys, empty-message suppression, unknown placeholders left literal, and reload-with-invalid-file leaving the previous config active (45 tests total; found and fixed two real bugs along the way: `YamlConfiguration.loadConfiguration()` silently swallows parse errors — switched to the throwing `load()` API — and the menu title was duplicated across `config.yml` and `messages.yml` with the config.yml copy also unclosed — removed from `config.yml`, kept as the single source in `messages.yml`)
 
 ## 5. Concurrency and storage ports — branch `feature/storage-core` → `develop`
 
