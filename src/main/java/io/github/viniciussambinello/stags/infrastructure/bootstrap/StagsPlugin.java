@@ -1,5 +1,6 @@
 package io.github.viniciussambinello.stags.infrastructure.bootstrap;
 
+import java.time.Clock;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -9,7 +10,11 @@ import org.bukkit.scheduler.BukkitTask;
 import io.github.viniciussambinello.stags.application.service.ActiveCosmeticResolver;
 import io.github.viniciussambinello.stags.application.service.CatalogueService;
 import io.github.viniciussambinello.stags.application.service.PlayerCosmeticService;
+import io.github.viniciussambinello.stags.application.service.SelectorCooldownService;
+import io.github.viniciussambinello.stags.application.service.SelectorService;
+import io.github.viniciussambinello.stags.application.usecase.ClearCosmetic;
 import io.github.viniciussambinello.stags.application.usecase.LoadPlayer;
+import io.github.viniciussambinello.stags.application.usecase.SelectCosmetic;
 import io.github.viniciussambinello.stags.infrastructure.concurrent.MainThreadDispatcher;
 import io.github.viniciussambinello.stags.infrastructure.concurrent.MainThreadGuard;
 import io.github.viniciussambinello.stags.infrastructure.concurrent.StorageExecutor;
@@ -22,6 +27,9 @@ import io.github.viniciussambinello.stags.infrastructure.render.PlayerSessionLis
 import io.github.viniciussambinello.stags.infrastructure.render.ReconciliationTask;
 import io.github.viniciussambinello.stags.infrastructure.render.TabListRenderAdapter;
 import io.github.viniciussambinello.stags.infrastructure.render.TitleHologramRenderAdapter;
+import io.github.viniciussambinello.stags.infrastructure.selector.ChatSelector;
+import io.github.viniciussambinello.stags.infrastructure.selector.MenuSelector;
+import io.github.viniciussambinello.stags.infrastructure.selector.SelectorGateway;
 import io.github.viniciussambinello.stags.infrastructure.storage.StorageBundle;
 import io.github.viniciussambinello.stags.infrastructure.storage.StorageFactory;
 
@@ -40,6 +48,8 @@ public final class StagsPlugin extends JavaPlugin {
     private final PlayerSessionListener playerSessionListener;
     private final ReconciliationTask reconciliationTask;
     private final AtomicReference<BukkitTask> scheduledReconciliation;
+    private final SelectorGateway selectorGateway;
+    private final MenuSelector menuSelector;
 
     public StagsPlugin() {
         this.storageExecutor = new StorageExecutor();
@@ -70,6 +80,18 @@ public final class StagsPlugin extends JavaPlugin {
                 new PlayerSessionListener(loadPlayer, playerCosmeticService, compositeCosmeticRenderer, dispatcher);
         this.reconciliationTask = new ReconciliationTask(getServer(), compositeCosmeticRenderer);
         this.scheduledReconciliation = new AtomicReference<>();
+
+        final SelectorService selectorService =
+                new SelectorService(catalogueService, playerCosmeticService, permissionOracle);
+        final SelectCosmetic selectCosmetic =
+                new SelectCosmetic(catalogueService, playerCosmeticService, permissionOracle, compositeCosmeticRenderer);
+        final ClearCosmetic clearCosmetic = new ClearCosmetic(playerCosmeticService, compositeCosmeticRenderer);
+        final SelectorCooldownService cooldownService = new SelectorCooldownService(Clock.systemUTC());
+        this.menuSelector = new MenuSelector(
+                configService, selectorService, selectCosmetic, clearCosmetic, cooldownService, dispatcher, getServer());
+        final ChatSelector chatSelector = new ChatSelector(
+                configService, selectorService, selectCosmetic, clearCosmetic, cooldownService, dispatcher, Clock.systemUTC());
+        this.selectorGateway = new SelectorGateway(configService, menuSelector, chatSelector);
     }
 
     @Override
@@ -83,6 +105,7 @@ public final class StagsPlugin extends JavaPlugin {
             getServer().getPluginManager().registerEvents(chatRenderAdapter, this);
             getServer().getPluginManager().registerEvents(titleHologramRenderAdapter, this);
             getServer().getPluginManager().registerEvents(playerSessionListener, this);
+            getServer().getPluginManager().registerEvents(menuSelector, this);
             titleHologramRenderAdapter.cleanupOrphans();
             startOrStopReconciliation();
             getLogger().info("s-tags " + getPluginMeta().getVersion() + " enabled using the "
@@ -143,5 +166,9 @@ public final class StagsPlugin extends JavaPlugin {
 
     public CompositeCosmeticRenderer compositeCosmeticRenderer() {
         return compositeCosmeticRenderer;
+    }
+
+    public SelectorGateway selectorGateway() {
+        return selectorGateway;
     }
 }
