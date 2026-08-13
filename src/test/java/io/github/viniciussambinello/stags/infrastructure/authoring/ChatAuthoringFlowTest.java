@@ -191,6 +191,27 @@ final class ChatAuthoringFlowTest {
     }
 
     @Test
+    void negativeWeightRetriesSameStepWithoutBreakingTheSession(@TempDir final Path dir) throws Exception {
+        final Fixture fixture = buildFixture(dir);
+        final UUID playerId = UUID.randomUUID();
+        final Player player = mockPlayer(playerId);
+
+        fixture.flow().startCreate(player, CosmeticKind.TAG);
+        fixture.flow().handleInput(player, "vip");
+        fixture.flow().handleInput(player, "<gold>[VIP]</gold>");
+        fixture.flow().handleInput(player, "stags.tag.vip");
+        fixture.flow().handleInput(player, "-1");
+
+        assertTrue(fixture.sessionStore().find(playerId).orElseThrow().step()
+                instanceof AuthoringStep.CreateAwaitingWeight);
+
+        fixture.flow().handleInput(player, "100");
+        fixture.flow().handleInput(player, "confirm");
+
+        assertTrue(fixture.catalogueService().catalogue().contains(CosmeticKind.TAG, new CosmeticId("vip")));
+    }
+
+    @Test
     void editFlowSkipsIdentifierAndUpdatesPrefix(@TempDir final Path dir) throws Exception {
         final Fixture fixture = buildFixture(dir);
         final var created = fixture.catalogueService()

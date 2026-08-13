@@ -65,6 +65,28 @@ final class TabListRenderAdapterTest {
     }
 
     @Test
+    void refreshWithNoActiveTagUsesZeroOrderInsteadOfCrashing(@TempDir final Path dir) throws Exception {
+        final CatalogueService catalogueService = new CatalogueService(new InMemoryCosmeticRepository());
+        catalogueService.loadInitial().get();
+        final UUID playerId = UUID.randomUUID();
+        final PlayerCosmeticService playerCosmeticService = new PlayerCosmeticService(new InMemorySelectionRepository());
+        playerCosmeticService.load(playerId).get();
+
+        final ActiveCosmeticResolver resolver =
+                new ActiveCosmeticResolver(catalogueService, playerCosmeticService, new StubPermissionOracle());
+        final ConfigService configService = ConfigService.initial(dir, Logger.getLogger("test"));
+        final TabListRenderAdapter adapter = new TabListRenderAdapter(configService, resolver, new io.github.viniciussambinello.stags.infrastructure.placeholder.NoopPlaceholderResolver());
+
+        final Player player = Mockito.mock(Player.class);
+        Mockito.when(player.getUniqueId()).thenReturn(playerId);
+        Mockito.when(player.getName()).thenReturn("Steve");
+
+        adapter.refresh(player);
+
+        Mockito.verify(player).setPlayerListOrder(0);
+    }
+
+    @Test
     void teardownClearsPlayerListName(@TempDir final Path dir) throws Exception {
         final CatalogueService catalogueService = new CatalogueService(new InMemoryCosmeticRepository());
         catalogueService.loadInitial().get();

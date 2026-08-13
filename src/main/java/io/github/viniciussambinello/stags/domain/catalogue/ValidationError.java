@@ -12,4 +12,7 @@ public sealed interface ValidationError {
 
     record MalformedPrefix(String reason) implements ValidationError {
     }
+
+    record InvalidWeight(String reason) implements ValidationError {
+    }
 }
