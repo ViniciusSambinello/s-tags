@@ -1,27 +1,27 @@
 ## 1. Repository and GitFlow foundation — branch `chore/repository-setup` → `develop`
 
-- [ ] 1.1 Create the long-lived `develop` branch from `main` and push it, then set `develop` as the GitHub default branch for pull requests
-- [ ] 1.2 Add `.gitignore` covering `build/`, `.gradle/`, `.idea/`, `*.iml`, `out/`, `run/` and local server artifacts, and verify `git status` is clean after a full build
-- [ ] 1.3 Add `.gitattributes` normalizing line endings (`* text=auto`, `*.bat text eol=crlf`, `gradlew text eol=lf`)
-- [ ] 1.4 Add `LICENSE`, and `README.md` documenting the hard requirements (Paper 26.2, Java 25), install steps, both storage backends, the full command and permission table, and the config surface
-- [ ] 1.5 Add `CONTRIBUTING.md` defining the GitFlow model (`main`, `develop`, `feature/*`, `release/*`, `hotfix/*`), Conventional Commits, and the English-only / no-code-comments / immutability conventions
-- [ ] 1.6 Add `CHANGELOG.md` following Keep a Changelog with an `Unreleased` section
-- [ ] 1.7 Add `.github/ISSUE_TEMPLATE/bug_report.yml`, `.github/ISSUE_TEMPLATE/feature_request.yml` and `.github/pull_request_template.md`, all in English
-- [ ] 1.8 Add `.github/workflows/build.yml` running `./gradlew build` on JDK 25 for pushes and pull requests targeting `develop` and `main`, and confirm the workflow passes on a test PR
-- [ ] 1.9 Add `.github/workflows/release.yml` that builds and attaches the shaded jar to a GitHub release when a `v*` tag is pushed
-- [ ] 1.10 Enable branch protection on `main` and `develop` requiring the build workflow to pass before merge
+- [x] 1.1 Create the long-lived `develop` branch from `main` locally (**not pushed** — pushing and changing the GitHub default branch are outward-facing actions deferred for explicit confirmation, see Group 15 notes)
+- [x] 1.2 Add `.gitignore` covering `build/`, `.gradle/`, `.idea/`, `*.iml`, `out/`, `run/` and local server artifacts, and verify `git status` is clean after a full build
+- [x] 1.3 Add `.gitattributes` normalizing line endings (`* text=auto`, `*.bat text eol=crlf`, `gradlew text eol=lf`)
+- [x] 1.4 Add `LICENSE`, and `README.md` documenting the hard requirements (Paper 26.2, Java 25), install steps, both storage backends, the full command and permission table, and the config surface
+- [x] 1.5 Add `CONTRIBUTING.md` defining the GitFlow model (`main`, `develop`, `feature/*`, `release/*`, `hotfix/*`), Conventional Commits, and the English-only / no-code-comments / immutability conventions
+- [x] 1.6 Add `CHANGELOG.md` following Keep a Changelog with an `Unreleased` section
+- [x] 1.7 Add `.github/ISSUE_TEMPLATE/bug_report.yml`, `.github/ISSUE_TEMPLATE/feature_request.yml` and `.github/pull_request_template.md`, all in English
+- [x] 1.8 Add `.github/workflows/build.yml` running `./gradlew build` on JDK 25 for pushes and pull requests targeting `develop` and `main` (workflow file authored; confirming a live PR run requires pushing to GitHub — deferred, see Group 15 notes)
+- [x] 1.9 Add `.github/workflows/release.yml` that builds and attaches the shaded jar to a GitHub release when a `v*` tag is pushed
+- [ ] 1.10 Enable branch protection on `main` and `develop` requiring the build workflow to pass before merge (GitHub repository setting — deferred for explicit confirmation, see Group 15 notes)
 
 ## 2. Build and plugin skeleton — branch `feature/build-toolchain` → `develop`
 
-- [ ] 2.1 Add the Gradle wrapper pinned to a version supporting Java 25 toolchains, and verify `./gradlew --version` reports it
-- [ ] 2.2 Write `settings.gradle.kts` with `rootProject.name = "s-tags"`
-- [ ] 2.3 Write `gradle/libs.versions.toml` declaring versions for `paper-api`, `placeholderapi`, `hikaricp`, `mysql-connector-j`, `junit` and the Shadow plugin, resolving the pinned HikariCP and Connector/J versions noted as open in `design.md`
-- [ ] 2.4 Write `build.gradle.kts`: Java toolchain 25, release 25, `group = io.github.viniciussambinello`, `version = 0.1.0`, PaperMC and PlaceholderAPI repositories, `compileOnly` for `paper-api` and PlaceholderAPI, `implementation` for HikariCP and Connector/J
-- [ ] 2.5 Configure the Shadow plugin to relocate HikariCP and Connector/J under `io.github.viniciussambinello.stags.libs`, minimize the jar, and verify by unzipping the output that no unrelocated `com.zaxxer` or `com.mysql` package is present
-- [ ] 2.6 Configure resource processing to expand the project version into `paper-plugin.yml`, and verify the built jar's descriptor reads `0.1.0`
-- [ ] 2.7 Write `src/main/resources/paper-plugin.yml` with `api-version: '26.2'`, the bootstrapper and main class, and PlaceholderAPI declared as a non-required server dependency
-- [ ] 2.8 Implement `StagsBootstrap` (`PluginBootstrap`) and `StagsPlugin` (`JavaPlugin`) with all collaborators passed through the constructor and every field `final`, per `design.md` D2
-- [ ] 2.9 Verify the jar loads on a clean Paper 26.2 server on JDK 25, logs enable and disable cleanly, and produces no stack trace
+- [x] 2.1 Add the Gradle wrapper pinned to a version supporting Java 25 toolchains, and verify `./gradlew --version` reports it (Gradle 9.7.0)
+- [x] 2.2 Write `settings.gradle.kts` with `rootProject.name = "s-tags"`
+- [x] 2.3 Write `gradle/libs.versions.toml` declaring versions for `paper-api`, `placeholderapi`, `hikaricp`, `mysql-connector-j`, `junit` and the Shadow plugin, resolving the pinned HikariCP and Connector/J versions noted as open in `design.md` (HikariCP 7.1.0, mysql-connector-j 26.7.0, placeholderapi 2.12.3, junit-jupiter 6.1.3, com.gradleup.shadow 9.6.1)
+- [x] 2.4 Write `build.gradle.kts`: Java toolchain 25, release 25, `group = io.github.viniciussambinello`, `version = 0.1.0`, PaperMC and PlaceholderAPI repositories, `compileOnly` for `paper-api` and PlaceholderAPI, `implementation` for HikariCP and Connector/J
+- [x] 2.5 Configure the Shadow plugin to relocate HikariCP and Connector/J under `io.github.viniciussambinello.stags.libs`, minimize the jar, and verify by unzipping the output that no unrelocated `com.zaxxer` or `com.mysql` package is present (mysql-connector-j relocation confirmed by unzip; HikariCP has no classes to verify yet since nothing references it until Group 7 — re-verified there)
+- [x] 2.6 Configure resource processing to expand the project version into `paper-plugin.yml`, and verify the built jar's descriptor reads `0.1.0`
+- [x] 2.7 Write `src/main/resources/paper-plugin.yml` with `api-version: '26.2'`, the bootstrapper and main class, and PlaceholderAPI declared as a non-required server dependency
+- [x] 2.8 Implement `StagsBootstrap` (`PluginBootstrap`) and `StagsPlugin` (`JavaPlugin`) with all collaborators passed through the constructor and every field `final`, per `design.md` D2 (constructor wiring expands as each later group adds collaborators)
+- [x] 2.9 Verify the jar loads on a clean Paper 26.2 server on JDK 25, logs enable and disable cleanly, and produces no stack trace (verified live: forced-kill boot showing clean enable, and a graceful `stop` run showing clean enable + disable, both with exit paths free of exceptions)
 
 ## 3. Domain model — branch `feature/domain-model` → `develop`
 

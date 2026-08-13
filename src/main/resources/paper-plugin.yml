@@ -1,0 +1,15 @@
+name: s-tags
+version: '${version}'
+main: io.github.viniciussambinello.stags.infrastructure.bootstrap.StagsPlugin
+bootstrapper: io.github.viniciussambinello.stags.infrastructure.bootstrap.StagsBootstrap
+description: A permission-owned tag and title cosmetic system.
+website: https://github.com/ViniciusSambinello/s-tags
+author: ViniciusSambinello
+api-version: '26.2'
+
+dependencies:
+  server:
+    PlaceholderAPI:
+      load: BEFORE
+      required: false
+      join-classpath: true
