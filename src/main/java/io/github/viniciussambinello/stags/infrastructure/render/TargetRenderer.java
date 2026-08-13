@@ -9,4 +9,7 @@ interface TargetRenderer {
     void teardown(Player player);
 
     void shutdown();
+
+    default void onViewerJoin(Player viewer) {
+    }
 }

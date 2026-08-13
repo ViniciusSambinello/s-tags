@@ -34,6 +34,7 @@ public final class PlayerSessionListener implements Listener {
         loadPlayer.execute(player.getUniqueId()).thenRun(() -> dispatcher.run(() -> {
             if (player.isOnline()) {
                 renderer.refresh(player.getUniqueId());
+                renderer.onViewerJoin(player);
             }
         }));
     }
