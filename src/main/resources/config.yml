@@ -1,0 +1,94 @@
+# s-tags configuration.
+# Every key below has a documented default and is validated at startup and
+# on reload. An invalid value falls back to its default and is logged.
+
+storage:
+  # YAML requires no further setup. MYSQL requires the section below.
+  backend: YAML
+
+  mysql:
+    host: localhost
+    port: 3306
+    database: minecraft
+    username: s_tags
+    password: change-me
+    # Prefix applied to every table this plugin creates and owns.
+    table-prefix: stags_
+    # HikariCP maximum pool size.
+    pool-size: 8
+    # What to do if the database cannot be reached at startup.
+    # ABORT disables the plugin. FALLBACK_YAML starts on the YAML backend instead.
+    failure-policy: ABORT
+
+  yaml:
+    # How often pending changes are batched and flushed to disk.
+    write-interval-seconds: 5
+
+selector:
+  # MENU opens an inventory. CHAT sends a clickable list in chat.
+  mode: MENU
+  # Whether tags/titles the player does not own are shown (locked) or hidden.
+  hide-locked-entries: false
+  # Whether the "clear selection" entry is always shown, even with nothing active.
+  always-show-clear-action: false
+
+  menu:
+    # Inventory size in slots. Must be a multiple of 9 between 9 and 54.
+    size: 54
+    # Slots that display cosmetic entries. Everything else is filler/navigation.
+    content-slots: [10, 11, 12, 13, 14, 15, 16,
+                     19, 20, 21, 22, 23, 24, 25,
+                     28, 29, 30, 31, 32, 33, 34]
+    entry-material: PLAYER_HEAD
+    locked-material: GRAY_STAINED_GLASS_PANE
+    filler-material: BLACK_STAINED_GLASS_PANE
+    previous-page-slot: 45
+    next-page-slot: 53
+    clear-selection-slot: 49
+
+  chat:
+    # Whether hovering a locked entry in chat mode shows the required permission.
+    show-locked-permission: true
+
+  cooldowns:
+    open-seconds: 1
+    select-seconds: 2
+
+render:
+  chat:
+    enabled: true
+    # Placeholders: <tag_prefix> <player> <message>
+    format: "<tag_prefix> <white><player></white><gray>:</gray> <message>"
+    # Permission required for a player's own message body to be formatted.
+    formatting-permission: stags.chat.format
+
+  nametag:
+    enabled: true
+
+  tab-list:
+    enabled: true
+    # WEIGHT sorts the tab list by active tag weight, descending. DEFAULT leaves server order.
+    ordering: WEIGHT
+
+  title-hologram:
+    enabled: true
+    # Vertical offset, in blocks, above the player's nametag.
+    vertical-offset: 0.35
+    # Whether a player sees their own title hologram.
+    self-visible: false
+
+  reconciliation:
+    # Optional periodic re-sync pass, on top of event-driven rendering. Off by default.
+    enabled: false
+    interval-seconds: 300
+
+authoring:
+  # How long an in-game authoring flow waits for input before it is discarded.
+  flow-timeout-seconds: 120
+  # Used to default a cosmetic's permission when the operator skips that step.
+  # {kind} and {id} are substituted.
+  default-permission-pattern: "stags.{kind}.{id}"
+
+command:
+  # Whether /stags force can assign a cosmetic the target player does not own.
+  allow-force-unowned: false
