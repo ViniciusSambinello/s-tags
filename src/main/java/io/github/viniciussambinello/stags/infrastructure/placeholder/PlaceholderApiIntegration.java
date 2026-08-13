@@ -1,5 +1,6 @@
 package io.github.viniciussambinello.stags.infrastructure.placeholder;
 
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Logger;
 
 import org.bukkit.Server;
@@ -24,7 +25,7 @@ public final class PlaceholderApiIntegration implements Listener {
     private final ActiveCosmeticResolver activeCosmeticResolver;
     private final CatalogueService catalogueService;
     private final PermissionOracle permissionOracle;
-    private StagsExpansion registeredExpansion;
+    private final AtomicReference<StagsExpansion> registeredExpansion;
 
     public PlaceholderApiIntegration(
             final Server server,
@@ -41,6 +42,7 @@ public final class PlaceholderApiIntegration implements Listener {
         this.activeCosmeticResolver = activeCosmeticResolver;
         this.catalogueService = catalogueService;
         this.permissionOracle = permissionOracle;
+        this.registeredExpansion = new AtomicReference<>();
     }
 
     public void activateIfPresent() {
@@ -74,9 +76,12 @@ public final class PlaceholderApiIntegration implements Listener {
 
     private void activate() {
         resolverHolder.activate(new PlaceholderApiResolver(server));
-        if (registeredExpansion == null) {
-            registeredExpansion = new StagsExpansion(pluginVersion, activeCosmeticResolver, catalogueService, permissionOracle);
-            registeredExpansion.register();
+        if (registeredExpansion.get() == null) {
+            final StagsExpansion expansion =
+                    new StagsExpansion(pluginVersion, activeCosmeticResolver, catalogueService, permissionOracle);
+            if (registeredExpansion.compareAndSet(null, expansion)) {
+                expansion.register();
+            }
         }
         logger.info("PlaceholderAPI detected, placeholder integration is active.");
     }

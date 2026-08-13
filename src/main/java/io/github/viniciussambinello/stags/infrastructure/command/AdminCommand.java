@@ -40,31 +40,25 @@ public final class AdminCommand {
     public LiteralCommandNode<CommandSourceStack> build() {
         return Commands.literal("stags")
                 .then(Commands.literal("create")
-                        .requires(source -> source.getSender().hasPermission("stags.admin.create"))
                         .then(kindArgument()
                                 .executes(this::executeCreate)))
                 .then(Commands.literal("edit")
-                        .requires(source -> source.getSender().hasPermission("stags.admin.edit"))
                         .then(kindArgument()
                                 .then(identifierArgument()
                                         .executes(this::executeEdit))))
                 .then(Commands.literal("delete")
-                        .requires(source -> source.getSender().hasPermission("stags.admin.delete"))
                         .then(kindArgument()
                                 .then(identifierArgument()
                                         .executes(this::executeDelete))))
                 .then(Commands.literal("list")
-                        .requires(source -> source.getSender().hasPermission("stags.admin.list"))
                         .then(kindArgument()
                                 .executes(this::executeList)))
                 .then(Commands.literal("force")
-                        .requires(source -> source.getSender().hasPermission("stags.admin.force"))
                         .then(playerArgument()
                                 .then(kindArgument()
                                         .then(identifierArgument()
                                                 .executes(this::executeForce)))))
                 .then(Commands.literal("reload")
-                        .requires(source -> source.getSender().hasPermission("stags.admin.reload"))
                         .executes(this::executeReload))
                 .build();
     }
@@ -109,8 +103,12 @@ public final class AdminCommand {
     private int executeCreate(final CommandContext<CommandSourceStack> context) {
         final StagsPlugin plugin = pluginSupplier.get();
         final ConfigService configService = plugin.configService();
-        final CosmeticKind kind = parseKind(context);
         final CommandSender sender = context.getSource().getSender();
+        if (!sender.hasPermission("stags.admin.create")) {
+            CommandMessages.sendNoPermission(configService, sender);
+            return 0;
+        }
+        final CosmeticKind kind = parseKind(context);
         if (kind == null) {
             CommandMessages.sendUsage(configService, sender, "/stags create <tag|title>");
             return 0;
@@ -126,8 +124,12 @@ public final class AdminCommand {
     private int executeEdit(final CommandContext<CommandSourceStack> context) {
         final StagsPlugin plugin = pluginSupplier.get();
         final ConfigService configService = plugin.configService();
-        final CosmeticKind kind = parseKind(context);
         final CommandSender sender = context.getSource().getSender();
+        if (!sender.hasPermission("stags.admin.edit")) {
+            CommandMessages.sendNoPermission(configService, sender);
+            return 0;
+        }
+        final CosmeticKind kind = parseKind(context);
         if (kind == null) {
             CommandMessages.sendUsage(configService, sender, "/stags edit <tag|title> <id>");
             return 0;
@@ -153,8 +155,12 @@ public final class AdminCommand {
     private int executeDelete(final CommandContext<CommandSourceStack> context) {
         final StagsPlugin plugin = pluginSupplier.get();
         final ConfigService configService = plugin.configService();
-        final CosmeticKind kind = parseKind(context);
         final CommandSender sender = context.getSource().getSender();
+        if (!sender.hasPermission("stags.admin.delete")) {
+            CommandMessages.sendNoPermission(configService, sender);
+            return 0;
+        }
+        final CosmeticKind kind = parseKind(context);
         if (kind == null) {
             CommandMessages.sendUsage(configService, sender, "/stags delete <tag|title> <id>");
             return 0;
@@ -175,8 +181,12 @@ public final class AdminCommand {
     private int executeList(final CommandContext<CommandSourceStack> context) {
         final StagsPlugin plugin = pluginSupplier.get();
         final ConfigService configService = plugin.configService();
-        final CosmeticKind kind = parseKind(context);
         final CommandSender sender = context.getSource().getSender();
+        if (!sender.hasPermission("stags.admin.list")) {
+            CommandMessages.sendNoPermission(configService, sender);
+            return 0;
+        }
+        final CosmeticKind kind = parseKind(context);
         if (kind == null) {
             CommandMessages.sendUsage(configService, sender, "/stags list <tag|title>");
             return 0;
@@ -196,8 +206,12 @@ public final class AdminCommand {
     private int executeForce(final CommandContext<CommandSourceStack> context) {
         final StagsPlugin plugin = pluginSupplier.get();
         final ConfigService configService = plugin.configService();
-        final CosmeticKind kind = parseKind(context);
         final CommandSender sender = context.getSource().getSender();
+        if (!sender.hasPermission("stags.admin.force")) {
+            CommandMessages.sendNoPermission(configService, sender);
+            return 0;
+        }
+        final CosmeticKind kind = parseKind(context);
         if (kind == null) {
             CommandMessages.sendUsage(configService, sender, "/stags force <player> <tag|title> <id>");
             return 0;
@@ -245,6 +259,10 @@ public final class AdminCommand {
         final StagsPlugin plugin = pluginSupplier.get();
         final ConfigService configService = plugin.configService();
         final CommandSender sender = context.getSource().getSender();
+        if (!sender.hasPermission("stags.admin.reload")) {
+            CommandMessages.sendNoPermission(configService, sender);
+            return 0;
+        }
         final var outcome = plugin.reloadConfiguration();
         if (outcome instanceof ConfigService.ReloadOutcome.Failure failure) {
             CommandMessages.send(configService, sender, "general.reload-invalid",

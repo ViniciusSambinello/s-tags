@@ -1,7 +1,5 @@
 package io.github.viniciussambinello.stags.infrastructure.command;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
-
 import java.nio.file.Path;
 import java.util.logging.Logger;
 
@@ -14,7 +12,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
 import com.mojang.brigadier.CommandDispatcher;
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
 
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 
@@ -133,13 +130,26 @@ final class AdminCommandTest {
     }
 
     @Test
-    void withoutAdminPermissionTheSubcommandIsNotFound(@TempDir final Path dir) throws Exception {
+    void withoutAdminPermissionTheCommandIsRefusedWithTheNoPermissionMessage(@TempDir final Path dir) throws Exception {
         final Fixture fixture = buildFixture(dir);
         final ConsoleCommandSender console = Mockito.mock(ConsoleCommandSender.class);
         Mockito.when(console.hasPermission(Mockito.anyString())).thenReturn(false);
 
-        assertThrows(CommandSyntaxException.class,
-                () -> dispatcherFor(fixture.plugin()).execute("stags list tag", sourceFor(console)));
+        dispatcherFor(fixture.plugin()).execute("stags list tag", sourceFor(console));
+
+        Mockito.verify(console, Mockito.atLeastOnce()).sendMessage(Mockito.any(Component.class));
+    }
+
+    @Test
+    void withoutTheCreatePermissionNoAuthoringFlowIsStarted(@TempDir final Path dir) throws Exception {
+        final Fixture fixture = buildFixture(dir);
+        final Player player = Mockito.mock(Player.class);
+        Mockito.when(player.hasPermission(Mockito.anyString())).thenReturn(false);
+
+        dispatcherFor(fixture.plugin()).execute("stags create tag", sourceFor(player));
+
+        Mockito.verify(fixture.plugin(), Mockito.never()).chatAuthoringFlow();
+        Mockito.verify(player, Mockito.atLeastOnce()).sendMessage(Mockito.any(Component.class));
     }
 
     @Test

@@ -30,7 +30,15 @@ public final class PlayerSessionListener implements Listener {
 
     @EventHandler
     public void onJoin(final PlayerJoinEvent event) {
-        final Player player = event.getPlayer();
+        handleJoin(event.getPlayer());
+    }
+
+    @EventHandler
+    public void onQuit(final PlayerQuitEvent event) {
+        handleQuit(event.getPlayer());
+    }
+
+    void handleJoin(final Player player) {
         loadPlayer.execute(player.getUniqueId()).thenRun(() -> dispatcher.run(() -> {
             if (player.isOnline()) {
                 renderer.refresh(player.getUniqueId());
@@ -39,9 +47,7 @@ public final class PlayerSessionListener implements Listener {
         }));
     }
 
-    @EventHandler
-    public void onQuit(final PlayerQuitEvent event) {
-        final Player player = event.getPlayer();
+    void handleQuit(final Player player) {
         renderer.teardown(player);
         playerCosmeticService.awaitPending(player.getUniqueId())
                 .thenRun(() -> playerCosmeticService.release(player.getUniqueId()));

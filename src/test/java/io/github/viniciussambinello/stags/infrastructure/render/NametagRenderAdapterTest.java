@@ -140,4 +140,36 @@ final class NametagRenderAdapterTest {
 
         assertEquals(0, registeredTeams.size());
     }
+
+    @Test
+    void shutdownUnregistersEveryManagedTeamLeavingNoResidue(@TempDir final Path dir) throws Exception {
+        final InMemoryCosmeticRepository cosmeticRepository = new InMemoryCosmeticRepository();
+        final Cosmetic vip = new Cosmetic(
+                CosmeticKind.TAG, new CosmeticId("vip"), Prefix.parse("<gold>[VIP]</gold>"),
+                new PermissionNode("stags.tag.vip"), new Weight(100));
+        cosmeticRepository.insert(vip).get();
+        final CatalogueService catalogueService = new CatalogueService(cosmeticRepository);
+        catalogueService.loadInitial().get();
+
+        final UUID playerId = UUID.randomUUID();
+        final InMemorySelectionRepository selectionRepository = new InMemorySelectionRepository();
+        selectionRepository.put(new PlayerCosmetics(playerId, new Selection.Active(new CosmeticId("vip")), Selection.UNSET));
+        final PlayerCosmeticService playerCosmeticService = new PlayerCosmeticService(selectionRepository);
+        playerCosmeticService.load(playerId).get();
+
+        final ActiveCosmeticResolver resolver = new ActiveCosmeticResolver(
+                catalogueService, playerCosmeticService, new StubPermissionOracle().grant(playerId, "stags.tag.vip"));
+        final Scoreboard scoreboard = mockScoreboard();
+        final Server server = mockServer(scoreboard);
+        final ConfigService configService = realConfigService(dir);
+        final NametagRenderAdapter adapter = new NametagRenderAdapter(configService, resolver, new io.github.viniciussambinello.stags.infrastructure.placeholder.NoopPlaceholderResolver(), server);
+        final Player player = mockPlayer(playerId, "Steve");
+        adapter.refresh(player);
+        final Team managedTeam = registeredTeams.values().iterator().next();
+
+        adapter.shutdown();
+        adapter.shutdown();
+
+        Mockito.verify(managedTeam, Mockito.times(1)).unregister();
+    }
 }

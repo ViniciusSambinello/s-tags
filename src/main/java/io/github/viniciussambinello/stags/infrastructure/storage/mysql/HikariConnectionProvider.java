@@ -2,6 +2,7 @@ package io.github.viniciussambinello.stags.infrastructure.storage.mysql;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.time.Duration;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
@@ -9,6 +10,8 @@ import com.zaxxer.hikari.HikariDataSource;
 import io.github.viniciussambinello.stags.infrastructure.config.MySqlConfig;
 
 public final class HikariConnectionProvider implements AutoCloseable {
+
+    private static final Duration CONNECTION_TIMEOUT = Duration.ofSeconds(10);
 
     private final HikariDataSource dataSource;
 
@@ -20,6 +23,8 @@ public final class HikariConnectionProvider implements AutoCloseable {
         hikariConfig.setPassword(config.password());
         hikariConfig.setMaximumPoolSize(config.poolSize());
         hikariConfig.setPoolName("s-tags-hikari");
+        hikariConfig.setInitializationFailTimeout(-1);
+        hikariConfig.setConnectionTimeout(CONNECTION_TIMEOUT.toMillis());
         hikariConfig.addDataSourceProperty("cachePrepStmts", "true");
         hikariConfig.addDataSourceProperty("prepStmtCacheSize", "250");
         hikariConfig.addDataSourceProperty("prepStmtCacheSqlLimit", "2048");
