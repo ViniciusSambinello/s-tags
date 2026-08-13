@@ -138,7 +138,7 @@ The one deliberate concession: `domain` holds Adventure `Component` values for r
 
 **Chat** — `AsyncChatEvent` with a `ChatRenderer`. Rendering happens on the async chat thread reading immutable snapshots, so it costs the main thread nothing. The message body is inserted as a literal `Component` unless the sender holds the formatting permission, which is what makes the "markup rendered literally" scenario safe by construction rather than by sanitizing strings.
 
-**Nametag** — scoreboard teams, **one team per tag** rather than one per player. With N players and M tags this is M teams instead of N, and a player changing tags is one team-membership packet instead of a team create/destroy. Team names are generated as `st_` + inverted zero-padded weight + a short deterministic hash of the cosmetic id, bounded to a safe length; encoding weight into the name gives correct vanilla nametag ordering for free.
+**Nametag** — scoreboard teams, **one team per tag** rather than one per player. With N players and M tags this is M teams instead of N, and a player changing tags is one team-membership packet instead of a team create/destroy. Team names are generated as `st_` + a short deterministic hash of the cosmetic id, bounded to a safe length. Unlike the tab list, the floating nametag has no ordering concept to encode into the name: each player's nametag renders independently above their own head from their own team's prefix/color, not as a sorted list, and team-name-based sorting only ever affects the tab list's legacy fallback order, which Paper's `Player#setPlayerListOrder` (used directly, see below) makes irrelevant here.
 
 **Tab list** — `Player#playerListName(Component)` for the prefix and Paper's player list order API for weight-based ordering.
 

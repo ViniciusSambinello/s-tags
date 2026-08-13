@@ -118,7 +118,7 @@ public final class MySqlCosmeticRepository implements CosmeticRepository {
         return new Cosmetic(
                 CosmeticKind.valueOf(resultSet.getString("kind")),
                 new CosmeticId(resultSet.getString("id")),
-                Prefix.parse(resultSet.getString("prefix")),
+                Prefix.parseStored(resultSet.getString("prefix")),
                 new PermissionNode(resultSet.getString("permission")),
                 new Weight(resultSet.getInt("weight")));
     }

@@ -59,7 +59,7 @@ messages:
     error-invalid-identifier: "<red>Invalid identifier: <reason></red>"
     # Placeholders: <reason>
     error-invalid-prefix: "<red>Invalid prefix: <reason></red>"
-    error-invalid-weight: "<red>Weight must be a whole number.</red>"
+    error-invalid-weight: "<red>Weight must be zero or a positive whole number.</red>"
     identifier-immutable: "<red>The identifier cannot be edited, delete and recreate instead.</red>"
     edit-target-missing: "<red>That entry no longer exists, edit cancelled.</red>"
     # Placeholders: <id>, <count>

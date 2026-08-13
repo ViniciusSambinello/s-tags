@@ -4,7 +4,7 @@ plugins {
 }
 
 group = "io.github.viniciussambinello"
-version = "0.1.0"
+version = "0.1.1"
 description = "A Paper 26.2 plugin providing a permission-owned tag and title cosmetic system."
 
 repositories {

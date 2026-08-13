@@ -115,7 +115,7 @@ public final class YamlCosmeticRepository implements CosmeticRepository, AutoClo
                 final Cosmetic cosmetic = new Cosmetic(
                         kind,
                         new CosmeticId(rawId),
-                        Prefix.parse(entry.getString("prefix", "")),
+                        Prefix.parseStored(entry.getString("prefix", "")),
                         new PermissionNode(entry.getString("permission", "")),
                         new Weight(entry.getInt("weight", 0)));
                 state.get(kind).put(cosmetic.id(), cosmetic);

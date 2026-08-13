@@ -40,7 +40,7 @@ public final class TabListRenderAdapter implements TargetRenderer {
         player.playerListName(prefix.append(Component.text(player.getName())));
 
         if (configService.config().render().tabList().ordering() == TabListOrdering.WEIGHT) {
-            final int weight = activeTag.map(tag -> tag.weight().value()).orElse(Integer.MIN_VALUE);
+            final int weight = activeTag.map(tag -> tag.weight().value()).orElse(0);
             player.setPlayerListOrder(weight);
         } else {
             player.setPlayerListOrder(0);

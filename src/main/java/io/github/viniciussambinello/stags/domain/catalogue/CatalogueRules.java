@@ -31,6 +31,14 @@ public final class CatalogueRules {
         }
     }
 
+    public FieldValidation<Weight> validateWeight(final int rawWeight) {
+        try {
+            return new FieldValidation.Valid<>(new Weight(rawWeight));
+        } catch (final IllegalArgumentException exception) {
+            return new FieldValidation.Invalid<>(new ValidationError.InvalidWeight(exception.getMessage()));
+        }
+    }
+
     public ValidationResult validateNew(
             final CosmeticKind kind,
             final String rawId,
@@ -50,8 +58,13 @@ public final class CatalogueRules {
         }
         final Prefix prefix = ((FieldValidation.Valid<Prefix>) prefixValidation).value();
 
+        final FieldValidation<Weight> weightValidation = validateWeight(rawWeight);
+        if (weightValidation instanceof FieldValidation.Invalid<Weight> invalid) {
+            return new ValidationResult.Rejected(invalid.error());
+        }
+        final Weight weight = ((FieldValidation.Valid<Weight>) weightValidation).value();
+
         final PermissionNode permission = new PermissionNode(rawPermission);
-        final Weight weight = new Weight(rawWeight);
         return new ValidationResult.Accepted(new Cosmetic(kind, id, prefix, permission, weight));
     }
 
@@ -66,8 +79,13 @@ public final class CatalogueRules {
         }
         final Prefix prefix = ((FieldValidation.Valid<Prefix>) prefixValidation).value();
 
+        final FieldValidation<Weight> weightValidation = validateWeight(rawWeight);
+        if (weightValidation instanceof FieldValidation.Invalid<Weight> invalid) {
+            return new ValidationResult.Rejected(invalid.error());
+        }
+        final Weight weight = ((FieldValidation.Valid<Weight>) weightValidation).value();
+
         final PermissionNode permission = new PermissionNode(rawPermission);
-        final Weight weight = new Weight(rawWeight);
         return new ValidationResult.Accepted(existing.withPrefix(prefix).withPermission(permission).withWeight(weight));
     }
 }
