@@ -1,6 +1,7 @@
 package io.github.viniciussambinello.stags.infrastructure.selector;
 
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
@@ -12,12 +13,13 @@ final class MenuHolder implements InventoryHolder {
     private final UUID playerId;
     private final CosmeticKind kind;
     private final int page;
-    private Inventory inventory;
+    private final AtomicReference<Inventory> inventory;
 
     MenuHolder(final UUID playerId, final CosmeticKind kind, final int page) {
         this.playerId = playerId;
         this.kind = kind;
         this.page = page;
+        this.inventory = new AtomicReference<>();
     }
 
     UUID playerId() {
@@ -33,11 +35,11 @@ final class MenuHolder implements InventoryHolder {
     }
 
     void attach(final Inventory inventory) {
-        this.inventory = inventory;
+        this.inventory.set(inventory);
     }
 
     @Override
     public Inventory getInventory() {
-        return inventory;
+        return inventory.get();
     }
 }

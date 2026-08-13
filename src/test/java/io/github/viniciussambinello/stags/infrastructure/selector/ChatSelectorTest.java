@@ -188,4 +188,84 @@ final class ChatSelectorTest {
         final PlayerCosmetics loaded = fixture.playerCosmeticService().cached(playerId).orElseThrow();
         assertEquals(Selection.UNSET, loaded.tagSelection());
     }
+
+    @Test
+    void hoveringAnOwnedEntryShowsItsRenderedPrefix(@TempDir final Path dir) throws Exception {
+        final UUID playerId = UUID.randomUUID();
+        final Fixture fixture = buildFixture(playerId, true);
+
+        final ConfigService configService = ConfigService.initial(dir, Logger.getLogger("test"));
+        final SelectorCooldownService cooldownService = new SelectorCooldownService(Clock.systemUTC());
+        final ChatSelector chatSelector = new ChatSelector(
+                configService, fixture.selectorService(), fixture.selectCosmetic(), fixture.clearCosmetic(),
+                cooldownService, immediateDispatcher(), Clock.systemUTC());
+
+        final Player player = Mockito.mock(Player.class);
+        Mockito.when(player.getUniqueId()).thenReturn(playerId);
+        Mockito.when(player.isOnline()).thenReturn(true);
+
+        chatSelector.open(player, CosmeticKind.TAG);
+
+        final ArgumentCaptor<Component> captor = ArgumentCaptor.forClass(Component.class);
+        Mockito.verify(player, Mockito.atLeastOnce()).sendMessage(captor.capture());
+        final Component line = captor.getAllValues().get(0);
+        assertNotNull(line.hoverEvent());
+    }
+
+    @Test
+    void clickingClearReleasesTheActiveSelectionAndRefreshesRendering(@TempDir final Path dir) throws Exception {
+        final UUID playerId = UUID.randomUUID();
+        final Fixture fixture = buildFixture(playerId, true);
+        fixture.selectCosmetic().execute(playerId, CosmeticKind.TAG, new CosmeticId("vip")).get();
+
+        final ConfigService configService = ConfigService.initial(dir, Logger.getLogger("test"));
+        final SelectorCooldownService cooldownService = new SelectorCooldownService(Clock.systemUTC());
+        final ChatSelector chatSelector = new ChatSelector(
+                configService, fixture.selectorService(), fixture.selectCosmetic(), fixture.clearCosmetic(),
+                cooldownService, immediateDispatcher(), Clock.systemUTC());
+
+        final Player player = Mockito.mock(Player.class);
+        Mockito.when(player.getUniqueId()).thenReturn(playerId);
+        Mockito.when(player.isOnline()).thenReturn(true);
+
+        chatSelector.open(player, CosmeticKind.TAG);
+        final int refreshesBeforeClear = fixture.renderer().refreshed().size();
+        chatSelector.onClearClicked(player, CosmeticKind.TAG);
+
+        final PlayerCosmetics loaded = fixture.playerCosmeticService().cached(playerId).orElseThrow();
+        assertEquals(Selection.CLEARED, loaded.tagSelection());
+        assertEquals(refreshesBeforeClear + 1, fixture.renderer().refreshed().size());
+    }
+
+    @Test
+    void openingAnEmptySelectorSendsTheEmptyMessage(@TempDir final Path dir) throws Exception {
+        final UUID playerId = UUID.randomUUID();
+        final PlayerCosmeticService playerCosmeticService = new PlayerCosmeticService(new InMemorySelectionRepository());
+        playerCosmeticService.load(playerId).get();
+        final CatalogueService catalogueService = new CatalogueService(new InMemoryCosmeticRepository());
+        catalogueService.loadInitial().get();
+        final StubPermissionOracle permissions = new StubPermissionOracle();
+        final SelectorService selectorService = new SelectorService(catalogueService, playerCosmeticService, permissions);
+        final RecordingCosmeticRenderer renderer = new RecordingCosmeticRenderer();
+        final SelectCosmetic selectCosmetic = new SelectCosmetic(catalogueService, playerCosmeticService, permissions, renderer);
+        final ClearCosmetic clearCosmetic = new ClearCosmetic(playerCosmeticService, renderer);
+
+        final ConfigService configService = ConfigService.initial(dir, Logger.getLogger("test"));
+        final SelectorCooldownService cooldownService = new SelectorCooldownService(Clock.systemUTC());
+        final ChatSelector chatSelector = new ChatSelector(
+                configService, selectorService, selectCosmetic, clearCosmetic, cooldownService, immediateDispatcher(), Clock.systemUTC());
+
+        final Player player = Mockito.mock(Player.class);
+        Mockito.when(player.getUniqueId()).thenReturn(playerId);
+        Mockito.when(player.isOnline()).thenReturn(true);
+
+        chatSelector.open(player, CosmeticKind.TAG);
+
+        final ArgumentCaptor<Component> captor = ArgumentCaptor.forClass(Component.class);
+        Mockito.verify(player, Mockito.atLeastOnce()).sendMessage(captor.capture());
+        final String expected = configService.messages().render("selector.empty",
+                net.kyori.adventure.text.minimessage.tag.resolver.Placeholder.component(
+                        "kind", Component.text("tag"))).orElseThrow().toString();
+        assertEquals(expected, captor.getAllValues().get(0).toString());
+    }
 }

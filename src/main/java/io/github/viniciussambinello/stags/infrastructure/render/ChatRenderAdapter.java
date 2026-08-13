@@ -39,8 +39,11 @@ public final class ChatRenderAdapter implements Listener {
         if (!configService.config().render().chat().enabled()) {
             return;
         }
-
         final Player sender = event.getPlayer();
+        event.renderer((source, sourceDisplayName, message, viewer) -> render(sender, sourceDisplayName, message));
+    }
+
+    Component render(final Player sender, final Component sourceDisplayName, final Component message) {
         final Optional<Cosmetic> activeTag = activeCosmeticResolver.activeCosmetic(sender.getUniqueId(), CosmeticKind.TAG);
         final Component tagPrefix = activeTag
                 .map(tag -> placeholderResolver.resolve(tag.prefix(), sender.getUniqueId()).append(Component.space()))
@@ -50,11 +53,9 @@ public final class ChatRenderAdapter implements Listener {
         final String formattingPermission = configService.config().render().chat().formattingPermission();
         final boolean canFormat = sender.hasPermission(formattingPermission);
 
-        event.renderer((source, sourceDisplayName, message, viewer) -> {
-            final Component body = canFormat
-                    ? RAW_MESSAGE_PARSER.deserialize(PlainTextComponentSerializer.plainText().serialize(message))
-                    : message;
-            return ChatFormat.render(format, tagPrefix, sourceDisplayName, body);
-        });
+        final Component body = canFormat
+                ? RAW_MESSAGE_PARSER.deserialize(PlainTextComponentSerializer.plainText().serialize(message))
+                : message;
+        return ChatFormat.render(format, tagPrefix, sourceDisplayName, body);
     }
 }
