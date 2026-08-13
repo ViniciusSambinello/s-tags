@@ -12,6 +12,21 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.4
+        env:
+          MYSQL_ROOT_PASSWORD: root_pw
+          MYSQL_DATABASE: stags_test
+          MYSQL_USER: stags_test
+          MYSQL_PASSWORD: stags_test_pw
+        ports:
+          - 3307:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h localhost -u root -proot_pw"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=10
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -27,6 +42,9 @@ jobs:
 
       - name: Build
         run: ./gradlew build --no-daemon
+
+      - name: Run MySQL integration tests
+        run: ./gradlew integrationTest --no-daemon
 
       - name: Upload test reports
         if: always()

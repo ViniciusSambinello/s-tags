@@ -39,7 +39,20 @@ tasks.withType<JavaCompile> {
 }
 
 tasks.test {
-    useJUnitPlatform()
+    useJUnitPlatform {
+        excludeTags("mysql-integration")
+    }
+}
+
+tasks.register<Test>("integrationTest") {
+    description = "Runs tests tagged mysql-integration against a reachable MySQL instance."
+    group = "verification"
+    testClassesDirs = sourceSets.test.get().output.classesDirs
+    classpath = sourceSets.test.get().runtimeClasspath
+    useJUnitPlatform {
+        includeTags("mysql-integration")
+    }
+    shouldRunAfter(tasks.test)
 }
 
 tasks.processResources {
