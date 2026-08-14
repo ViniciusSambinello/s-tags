@@ -125,6 +125,23 @@ final class ChatAuthoringFlowTest {
     }
 
     @Test
+    void legacyColorCodePrefixSurvivesConfirmationsCommitTimeRevalidation(@TempDir final Path dir) throws Exception {
+        final Fixture fixture = buildFixture(dir);
+        final UUID playerId = UUID.randomUUID();
+        final Player player = mockPlayer(playerId);
+
+        fixture.flow().startCreate(player, CosmeticKind.TAG);
+        fixture.flow().handleInput(player, "owner");
+        fixture.flow().handleInput(player, "&c[Owner]");
+        fixture.flow().handleInput(player, "skip");
+        fixture.flow().handleInput(player, "100");
+        fixture.flow().handleInput(player, "confirm");
+
+        assertTrue(fixture.catalogueService().catalogue().contains(CosmeticKind.TAG, new CosmeticId("owner")));
+        assertTrue(fixture.sessionStore().find(playerId).isEmpty());
+    }
+
+    @Test
     void cancelAtAnyStepDiscardsSessionAndPersistsNothing(@TempDir final Path dir) throws Exception {
         final Fixture fixture = buildFixture(dir);
         final UUID playerId = UUID.randomUUID();
