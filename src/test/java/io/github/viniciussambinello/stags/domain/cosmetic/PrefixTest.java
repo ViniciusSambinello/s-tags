@@ -56,4 +56,12 @@ final class PrefixTest {
         assertEquals(NamedTextColor.RED, reloaded.rendered().color());
         assertEquals("[VIP]", PlainTextComponentSerializer.plainText().serialize(reloaded.rendered()));
     }
+
+    @Test
+    void aLegacyConvertedPrefixSurvivesBeingStrictlyReparsed() {
+        final Prefix authored = Prefix.parse("&c[Owner]");
+        final Prefix reconfirmed = Prefix.parse(authored.raw());
+        assertEquals(NamedTextColor.RED, reconfirmed.rendered().color());
+        assertEquals("[Owner]", PlainTextComponentSerializer.plainText().serialize(reconfirmed.rendered()));
+    }
 }
